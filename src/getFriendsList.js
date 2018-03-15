@@ -1,11 +1,11 @@
-"use strict";
 
-var cheerio = require("cheerio");
-var utils = require("../utils");
-var log = require("npmlog");
+
+const cheerio = require('cheerio');
+const utils = require('../utils');
+const log = require('npmlog');
 
 // [almost] copy pasted from one of FB's minified file (GenderConst)
-var GENDERS = {
+const GENDERS = {
   0: 'unknown',
   1: 'female_singular',
   2: 'male_singular',
@@ -21,44 +21,44 @@ var GENDERS = {
 };
 
 function formatData(obj) {
-  return Object.keys(obj).map(function(key) {
-    var user = obj[key];
+  return Object.keys(obj).map((key) => {
+    const user = obj[key];
     return {
       alternateName: user.alternateName,
       firstName: user.firstName,
       gender: GENDERS[user.gender],
       userID: utils.formatID(user.id.toString()),
-      isFriend: (user.is_friend != null && user.is_friend) ? true : false,
+      isFriend: !!((user.is_friend != null && user.is_friend)),
       fullName: user.name,
       profilePicture: user.thumbSrc,
       type: user.type,
       profileUrl: user.uri,
       vanity: user.vanity,
       isBirthday: !!user.is_birthday,
-    }
+    };
   });
 }
 
-module.exports = function(defaultFuncs, api, ctx) {
+module.exports = function (defaultFuncs, api, ctx) {
   return function getFriendsList(callback) {
-    if(!callback) {
-      throw {error: "getFriendsList: need callback"};
+    if (!callback) {
+      throw { error: 'getFriendsList: need callback' };
     }
 
     defaultFuncs
-      .postFormData("https://www.facebook.com/chat/user_info_all", ctx.jar, {}, {viewer: ctx.userID})
+      .postFormData('https://www.facebook.com/chat/user_info_all', ctx.jar, {}, { viewer: ctx.userID })
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
-      .then(function(resData) {
+      .then((resData) => {
         if (!resData) {
-          throw {error: "getFriendsList returned empty object."};
+          throw { error: 'getFriendsList returned empty object.' };
         }
-        if(resData.error) {
+        if (resData.error) {
           throw resData;
         }
         callback(null, formatData(resData.payload));
       })
-      .catch(function(err) {
-        log.error("getFriendsList", err);
+      .catch((err) => {
+        log.error('getFriendsList', err);
         return callback(err);
       });
   };

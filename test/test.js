@@ -10,7 +10,7 @@ var credentials = {
 
 var userIDs = conf.userIDs;
 
-var options = { selfListen: true, listenEvents: true, logLevel: "silent"};
+var options = { selfListen: true, listenEvents: true, logLevel: 'silent'};
 var pageOptions = {logLevel: 'silent', pageID: conf.pageID};
 var getType = require('../utils').getType;
 var formatDeltaMessage = require('../utils').formatDeltaMessage;
@@ -29,7 +29,7 @@ function checkErr(done){
 
 describe('Login:', function() {
   var api = null;
-  process.on('SIGINT', () => api && !api.logout() && console.log("Logged out :)"));
+  process.on('SIGINT', () => api && !api.logout() && console.log('Logged out :)'));
   var tests = [];
   var stopListening;
   this.timeout(20000);
@@ -46,7 +46,7 @@ describe('Login:', function() {
       api = localAPI;
       stopListening = api.listen(function (err, msg) {
         if (err) throw err;
-        if (msg.type === "message") {
+        if (msg.type === 'message') {
           assert(msg.senderID && !isNaN(msg.senderID));
           assert(msg.threadID && !isNaN(msg.threadID));
           assert(msg.timestamp && !isNaN(msg.timestamp));
@@ -72,7 +72,7 @@ describe('Login:', function() {
   });
 
   it('should send text message object (user)', function (done){
-    var body = "text-msg-obj-" + Date.now();
+    var body = 'text-msg-obj-' + Date.now();
     listen(done, msg =>
       msg.type === 'message' &&
       msg.body === body &&
@@ -94,7 +94,7 @@ describe('Login:', function() {
   });
 
   it('should send basic string (user)', function (done){
-    var body = "basic-str-" + Date.now();
+    var body = 'basic-str-' + Date.now();
     listen(done, msg =>
       msg.type === 'message' &&
       msg.body === body &&
@@ -104,27 +104,27 @@ describe('Login:', function() {
   });
 
   it('should get thread info (user)', function (done){
-      api.getThreadInfo(userID, (err, info) => {
-        if (err) done(err);
+    api.getThreadInfo(userID, (err, info) => {
+      if (err) done(err);
 
-        assert(info.participantIDs != null && info.participantIDs.length > 0);
-        assert(!info.participantIDs.some(isNaN));
-        assert(!info.participantIDs.some(v => v.length == 0));
-        assert(info.name != null);
-        assert(info.messageCount != null && !isNaN(info.messageCount));
-        assert(info.hasOwnProperty('emoji'));
-        assert(info.hasOwnProperty('nicknames'));
-        assert(info.hasOwnProperty('color'));
-        done();
-      });
+      assert(info.participantIDs != null && info.participantIDs.length > 0);
+      assert(!info.participantIDs.some(isNaN));
+      assert(!info.participantIDs.some(v => v.length == 0));
+      assert(info.name != null);
+      assert(info.messageCount != null && !isNaN(info.messageCount));
+      assert(info.hasOwnProperty('emoji'));
+      assert(info.hasOwnProperty('nicknames'));
+      assert(info.hasOwnProperty('color'));
+      done();
+    });
   });
 
 
   it('should get the history of the chat (user)', function (done) {
     api.getThreadHistory(userID, 5, null, function(err, data) {
       checkErr(done)(err);
-      assert(getType(data) === "Array");
-      assert(data.every(function(v) {return getType(v) == "Object";}));
+      assert(getType(data) === 'Array');
+      assert(data.every(function(v) {return getType(v) == 'Object';}));
       done();
     });
   });
@@ -132,14 +132,14 @@ describe('Login:', function() {
   it('should get the history of the chat (user) (graphql)', function (done) {
     api.getThreadHistoryGraphQL(userID, 5, null, function(err, data) {
       checkErr(done)(err);
-      assert(getType(data) === "Array");
-      assert(data.every(function(v) {return getType(v) == "Object";}));
+      assert(getType(data) === 'Array');
+      assert(data.every(function(v) {return getType(v) == 'Object';}));
       done();
     });
   });
 
   it('should create a chat', function (done){
-    var body = "new-chat-" + Date.now();
+    var body = 'new-chat-' + Date.now();
     var inc = 0;
 
     function doneHack(){
@@ -158,7 +158,7 @@ describe('Login:', function() {
   });
 
   it('should send text message object (group)', function (done){
-    var body = "text-msg-obj-" + Date.now();
+    var body = 'text-msg-obj-' + Date.now();
     listen(done, msg =>
       msg.type === 'message' &&
       msg.body === body &&
@@ -171,7 +171,7 @@ describe('Login:', function() {
   });
 
   it('should send basic string (group)', function (done){
-    var body = "basic-str-" + Date.now();
+    var body = 'basic-str-' + Date.now();
     listen(done, msg =>
       msg.type === 'message' &&
       msg.body === body &&
@@ -198,10 +198,10 @@ describe('Login:', function() {
   });
 
   it('should send an attachment with a body (group)', function (done){
-    var body = "attach-" + Date.now();
+    var body = 'attach-' + Date.now();
     var attach = [];
-    attach.push(fs.createReadStream("test/data/test.txt"));
-    attach.push(fs.createReadStream("test/data/test.png"));
+    attach.push(fs.createReadStream('test/data/test.txt'));
+    attach.push(fs.createReadStream('test/data/test.png'));
     listen(done, function (msg) {
       return msg.type === 'message' && msg.body === body;
     });
@@ -214,8 +214,8 @@ describe('Login:', function() {
   it('should get the history of the chat (group)', function (done) {
     api.getThreadHistory(groupChatID, 5, null, function(err, data) {
       checkErr(done)(err);
-      assert(getType(data) === "Array");
-      assert(data.every(function(v) {return getType(v) == "Object";}));
+      assert(getType(data) === 'Array');
+      assert(data.every(function(v) {return getType(v) == 'Object';}));
       done();
     });
   });
@@ -223,8 +223,8 @@ describe('Login:', function() {
   it('should get the history of the chat (group) (graphql)', function (done) {
     api.getThreadHistoryGraphQL(groupChatID, 5, null, function(err, data) {
       checkErr(done)(err);
-      assert(getType(data) === "Array");
-      assert(data.every(function(v) {return getType(v) == "Object";}));
+      assert(getType(data) === 'Array');
+      assert(data.every(function(v) {return getType(v) == 'Object';}));
       done();
     });
   });
@@ -266,19 +266,19 @@ describe('Login:', function() {
   });
 
   xit('should get thread info (group)', function (done){
-      api.getThreadInfo(groupChatID, (err, info) => {
-        if (err) done(err);
+    api.getThreadInfo(groupChatID, (err, info) => {
+      if (err) done(err);
 
-        assert(info.participantIDs != null && info.participantIDs.length > 0);
-        assert(!info.participantIDs.some(isNaN));
-        assert(!info.participantIDs.some(v => v.length == 0));
-        assert(info.name != null);
-        assert(info.messageCount != null && !isNaN(info.messageCount));
-        assert(info.hasOwnProperty('emoji'));
-        assert(info.hasOwnProperty('nicknames'));
-        assert(info.hasOwnProperty('color'));
-        done();
-      });
+      assert(info.participantIDs != null && info.participantIDs.length > 0);
+      assert(!info.participantIDs.some(isNaN));
+      assert(!info.participantIDs.some(v => v.length == 0));
+      assert(info.name != null);
+      assert(info.messageCount != null && !isNaN(info.messageCount));
+      assert(info.hasOwnProperty('emoji'));
+      assert(info.hasOwnProperty('nicknames'));
+      assert(info.hasOwnProperty('color'));
+      done();
+    });
   });
 
   it('should retrieve a list of threads', function (done) {
@@ -334,7 +334,7 @@ describe('Login:', function() {
       var user = data[userIDs[0]];
       api.getUserID(user.name, function(err, data) {
         checkErr(done)(err);
-        assert(getType(data) === "Array");
+        assert(getType(data) === 'Array');
         assert(data.some(function(val) {
           return val.userID === userIDs[0];
         }));
@@ -346,33 +346,33 @@ describe('Login:', function() {
   it('should get the list of friends', function (done) {
     api.getFriendsList(function(err, data) {
       try {
-      checkErr(done)(err);
-      assert(getType(data) === "Array");
-      data.map(v => {
-        assert(getType(v.firstName) === "String");
-        assert(getType(v.gender) === "String");
-        assert(getType(v.userID) === "String");
-        assert(getType(v.isFriend) === "Boolean");
-        assert(getType(v.fullName) === "String");
-        assert(getType(v.profilePicture) === "String");
-        assert(getType(v.type) === "String");
-        assert(v.hasOwnProperty("profileUrl"));  // This can be null if the account is disabled
-        assert(getType(v.isBirthday) === "Boolean");
-      })
-      done();
-    } catch(e){
-      done(e);
-    }
+        checkErr(done)(err);
+        assert(getType(data) === 'Array');
+        data.map(v => {
+          assert(getType(v.firstName) === 'String');
+          assert(getType(v.gender) === 'String');
+          assert(getType(v.userID) === 'String');
+          assert(getType(v.isFriend) === 'Boolean');
+          assert(getType(v.fullName) === 'String');
+          assert(getType(v.profilePicture) === 'String');
+          assert(getType(v.type) === 'String');
+          assert(v.hasOwnProperty('profileUrl'));  // This can be null if the account is disabled
+          assert(getType(v.isBirthday) === 'Boolean');
+        });
+        done();
+      } catch(e){
+        done(e);
+      }
     });
   });
 
   it('should parse share attachment correctly', function () {
     var formatted = formatDeltaMessage(shareAttachmentFixture);
-    assert(formatted.attachments[0].type === "share");
-    assert(formatted.attachments[0].title === "search engines");
-    assert(formatted.attachments[0].target.items[0].name === "search engines");
+    assert(formatted.attachments[0].type === 'share');
+    assert(formatted.attachments[0].title === 'search engines');
+    assert(formatted.attachments[0].target.items[0].name === 'search engines');
     assert(formatted.attachments[0].target.items[0].call_to_actions.length === 3);
-    assert(formatted.attachments[0].target.items[0].call_to_actions[0].title === "Google");
+    assert(formatted.attachments[0].target.items[0].call_to_actions[0].title === 'Google');
   });
 
   it('should log out', function (done) {

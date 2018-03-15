@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var bluebird = require("bluebird");
-var request = bluebird.promisify(require("request").defaults({jar: true}));
+var bluebird = require('bluebird');
+var request = bluebird.promisify(require('request').defaults({jar: true}));
 var stream = require('stream');
 var log = require('npmlog');
 
@@ -9,7 +9,7 @@ function getHeaders(url) {
   var headers = {
     'Content-Type' : 'application/x-www-form-urlencoded',
     'Referer' : 'https://www.facebook.com/',
-    'Host' : url.replace('https://', '').split("/")[0],
+    'Host' : url.replace('https://', '').split('/')[0],
     'Origin' : 'https://www.facebook.com',
     'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18',
     'Connection' : 'keep-alive',
@@ -26,9 +26,9 @@ function isReadableStream(obj) {
 
 function get(url, jar, qs) {
   // I'm still confused about this
-  if(getType(qs) === "Object") {
+  if(getType(qs) === 'Object') {
     for(var prop in qs) {
-      if(qs.hasOwnProperty(prop) && getType(qs[prop]) === "Object") {
+      if(qs.hasOwnProperty(prop) && getType(qs[prop]) === 'Object') {
         qs[prop] = JSON.stringify(qs[prop]);
       }
     }
@@ -38,7 +38,7 @@ function get(url, jar, qs) {
     timeout: 60000,
     qs: qs,
     url: url,
-    method: "GET",
+    method: 'GET',
     jar: jar,
     gzip: true
   };
@@ -51,7 +51,7 @@ function post(url, jar, form) {
     headers: getHeaders(url),
     timeout: 60000,
     url: url,
-    method: "POST",
+    method: 'POST',
     form: form,
     jar: jar,
     gzip: true
@@ -67,7 +67,7 @@ function postFormData(url, jar, form, qs) {
     headers: headers,
     timeout: 60000,
     url: url,
-    method: "POST",
+    method: 'POST',
     formData: form,
     qs: qs,
     jar: jar,
@@ -78,36 +78,36 @@ function postFormData(url, jar, form, qs) {
 }
 
 function padZeros(val, len) {
-    val = String(val);
-    len = len || 2;
-    while (val.length < len) val = "0" + val;
-    return val;
+  val = String(val);
+  len = len || 2;
+  while (val.length < len) val = '0' + val;
+  return val;
 }
 
 function generateThreadingID(clientID) {
   var k = Date.now();
   var l = Math.floor(Math.random() * 4294967295);
   var m = clientID;
-  return ("<" + k + ":" + l + "-" + m + "@mail.projektitan.com>");
+  return ('<' + k + ':' + l + '-' + m + '@mail.projektitan.com>');
 }
 
 function binaryToDecimal(data) {
-  var ret = "";
-  while (data !== "0") {
+  var ret = '';
+  while (data !== '0') {
     var end = 0;
-    var fullName = "";
+    var fullName = '';
     var i = 0;
     for (;i < data.length;i++) {
       end = 2 * end + parseInt(data[i], 10);
       if (end >= 10) {
-        fullName += "1";
+        fullName += '1';
         end -= 10;
       } else {
-        fullName += "0";
+        fullName += '0';
       }
     }
     ret = end.toString() + ret;
-    data = fullName.slice(fullName.indexOf("1"));
+    data = fullName.slice(fullName.indexOf('1'));
   }
   return ret;
 }
@@ -115,7 +115,7 @@ function binaryToDecimal(data) {
 function generateOfflineThreadingID() {
   var ret = Date.now();
   var value = Math.floor(Math.random() * 4294967295);
-  var str = ("0000000000000000000000" + value.toString(2)).slice(-22);
+  var str = ('0000000000000000000000' + value.toString(2)).slice(-22);
   var msgs = ret.toString(2) + str;
   return binaryToDecimal(msgs);
 }
@@ -158,7 +158,7 @@ var j = {
     l.push(j[m]);
   }
   l.reverse();
-  h = new RegExp(l.join("|"), 'g');
+  h = new RegExp(l.join('|'), 'g');
 })();
 
 function presenceEncode(str) {
@@ -169,31 +169,25 @@ function presenceEncode(str) {
   });
 }
 
-function presenceDecode(str) {
-  return decodeURIComponent(str.replace(/[_A-Z]/g, function(m) {
-    return j[m];
-  }));
-}
-
 function generatePresence(userID) {
   var time = Date.now();
-  return "E" + presenceEncode(JSON.stringify({
-    "v": 3,
-    "time": parseInt(time / 1000, 10),
-    "user": userID,
-    "state": {
-      "ut": 0,
-      "t2": [],
-      "lm2": null,
-      "uct2": time,
-      "tr": null,
-      "tw": Math.floor(Math.random() * 4294967295) + 1,
-      "at": time
+  return 'E' + presenceEncode(JSON.stringify({
+    'v': 3,
+    'time': parseInt(time / 1000, 10),
+    'user': userID,
+    'state': {
+      'ut': 0,
+      't2': [],
+      'lm2': null,
+      'uct2': time,
+      'tr': null,
+      'tw': Math.floor(Math.random() * 4294967295) + 1,
+      'at': time
     },
-    "ch":{
-      ["p_" + userID]: 0
+    'ch':{
+      ['p_' + userID]: 0
     }
-  }))
+  }));
 }
 
 function generateAccessiblityCookie() {
@@ -209,20 +203,20 @@ function generateAccessiblityCookie() {
       hcm: 0,
       'hcm-ts': time
     }
-  ));
+    ));
 }
 
 function getGUID() {
   /** @type {number} */
   var sectionLength = Date.now();
   /** @type {string} */
-  var id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+  var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     /** @type {number} */
     var r = Math.floor((sectionLength + Math.random() * 16) % 16);
     /** @type {number} */
     sectionLength = Math.floor(sectionLength / 16);
     /** @type {string} */
-    var _guid = (c == "x" ? r : r & 7 | 8).toString(16);
+    var _guid = (c == 'x' ? r : r & 7 | 8).toString(16);
     return _guid;
   });
   return id;
@@ -235,239 +229,239 @@ function _formatAttachment(attachment1, attachment2) {
   // data that you'd want so we merge them for convenience.
   // Instead of having a bunch of if statements guarding every access to image_data,
   // we set it to empty object and use the fact that it'll return undefined.
-  attachment2 = attachment2 || {id:"", image_data: {}};
+  attachment2 = attachment2 || {id:'', image_data: {}};
   var fileName = attachment1.filename;
   attachment1 = attachment1.mercury ? attachment1.mercury : attachment1;
   var blob = attachment1.blob_attachment;
   var type =  blob && blob.__typename ? blob.__typename : attachment1.attach_type;
   if (! type && attachment1.sticker_attachment){
-    type = "StickerAttachment";
+    type = 'StickerAttachment';
     blob = attachment1.sticker_attachment;
   }
   else if (! type && attachment1.extensible_attachment){
-    type = "ExtensibleAttachment";
+    type = 'ExtensibleAttachment';
     blob = attachment1.extensible_attachment;
   }
   switch (type) {
-    case "sticker":
-      return {
-        type: "sticker",
-        url: attachment1.url,
-        stickerID: attachment1.metadata.stickerID.toString(),
-        packID: attachment1.metadata.packID.toString(),
-        frameCount: attachment1.metadata.frameCount,
-        frameRate: attachment1.metadata.frameRate,
-        framesPerRow: attachment1.metadata.framesPerRow,
-        framesPerCol: attachment1.metadata.framesPerCol,
-        spriteURI: attachment1.metadata.spriteURI,
-        spriteURI2x: attachment1.metadata.spriteURI2x,
-        height: attachment1.metadata.height,
-        width: attachment1.metadata.width,
-        caption: attachment2.caption,
-        description: attachment2.description,
-      };
-    case "file":
-      return {
-        type: "file",
-        name: attachment1.name,
-        url: attachment1.url,
-        ID: attachment2.id.toString(),
-        fileSize: attachment2.file_size,
-        isMalicious: attachment2.is_malicious,
-        mimeType: attachment2.mime_type,
-      };
-    case "photo":
-      return {
-        type: "photo",
-        ID: attachment1.metadata.fbid.toString(),
-        filename: fileName,
-        thumbnailUrl: attachment1.thumbnail_url,
+  case 'sticker':
+    return {
+      type: 'sticker',
+      url: attachment1.url,
+      stickerID: attachment1.metadata.stickerID.toString(),
+      packID: attachment1.metadata.packID.toString(),
+      frameCount: attachment1.metadata.frameCount,
+      frameRate: attachment1.metadata.frameRate,
+      framesPerRow: attachment1.metadata.framesPerRow,
+      framesPerCol: attachment1.metadata.framesPerCol,
+      spriteURI: attachment1.metadata.spriteURI,
+      spriteURI2x: attachment1.metadata.spriteURI2x,
+      height: attachment1.metadata.height,
+      width: attachment1.metadata.width,
+      caption: attachment2.caption,
+      description: attachment2.description,
+    };
+  case 'file':
+    return {
+      type: 'file',
+      name: attachment1.name,
+      url: attachment1.url,
+      ID: attachment2.id.toString(),
+      fileSize: attachment2.file_size,
+      isMalicious: attachment2.is_malicious,
+      mimeType: attachment2.mime_type,
+    };
+  case 'photo':
+    return {
+      type: 'photo',
+      ID: attachment1.metadata.fbid.toString(),
+      filename: fileName,
+      thumbnailUrl: attachment1.thumbnail_url,
 
-        previewUrl: attachment1.preview_url,
-        previewWidth: attachment1.preview_width,
-        previewHeight: attachment1.preview_height,
+      previewUrl: attachment1.preview_url,
+      previewWidth: attachment1.preview_width,
+      previewHeight: attachment1.preview_height,
 
-        largePreviewUrl: attachment1.large_preview_url,
-        largePreviewWidth: attachment1.large_preview_width,
-        largePreviewHeight: attachment1.large_preview_height,
+      largePreviewUrl: attachment1.large_preview_url,
+      largePreviewWidth: attachment1.large_preview_width,
+      largePreviewHeight: attachment1.large_preview_height,
 
-        url: attachment1.metadata.url,
-        width: attachment1.metadata.dimensions.split(',')[0],
-        height: attachment1.metadata.dimensions.split(',')[1],
-      };
-    case "animated_image":
-      return {
-        type: "animated_image",
-        name: attachment1.name,
-        facebookUrl: attachment1.url,
-        previewUrl: attachment1.preview_url,
-        previewWidth: attachment1.preview_width,
-        previewHeight: attachment1.preview_height,
-        thumbnailUrl: attachment1.thumbnail_url,
-        ID: attachment2.id.toString(),
-        filename: attachment2.filename,
-        mimeType: attachment2.mime_type,
-        width: attachment2.image_data.width,
-        height: attachment2.image_data.height,
-        url: attachment2.image_data.url,
-        rawGifImage: attachment2.image_data.raw_gif_image,
-        rawWebpImage: attachment2.image_data.raw_webp_image,
-        animatedGifUrl: attachment2.image_data.animated_gif_url,
-        animatedGifPreviewUrl: attachment2.image_data.animated_gif_preview_url,
-        animatedWebpUrl: attachment2.image_data.animated_webp_url,
-        animatedWebpPreviewUrl: attachment2.image_data.animated_webp_preview_url,
-      };
-    case "share":
-      return {
-        type: "share",
-        description: attachment1.share.description,
-        ID: attachment1.share.share_id.toString(),
-        subattachments: attachment1.share.subattachments,
-        animatedImageSize: attachment1.share.media.animated_image_size,
-        width: attachment1.share.media.image_size.width,
-        height: attachment1.share.media.image_size.height,
-        image: attachment1.share.media.image,
-        playable: attachment1.share.media.playable,
-        duration: attachment1.share.media.duration,
-        source: attachment1.share.source,
-        title: attachment1.share.title,
-        facebookUrl: attachment1.share.uri,
-        target: attachment1.share.target,
-        styleList: attachment1.share.style_list,
-        url: attachment2.href,
-      };
-    case "video":
-      return {
-        type: "video",
-        filename: attachment1.name,
-        thumbnailUrl: attachment1.thumbnail_url,
-        previewUrl: attachment1.preview_url,
-        previewWidth: attachment1.preview_width,
-        previewHeight: attachment1.preview_height,
-        ID: attachment1.metadata.fbid.toString(),
-        url: attachment1.url,
-        width: attachment1.metadata.dimensions.width,
-        height: attachment1.metadata.dimensions.height,
-        duration: attachment1.metadata.duration,
-      };
-    case "error":
-      return {
-        type: "error",
+      url: attachment1.metadata.url,
+      width: attachment1.metadata.dimensions.split(',')[0],
+      height: attachment1.metadata.dimensions.split(',')[1],
+    };
+  case 'animated_image':
+    return {
+      type: 'animated_image',
+      name: attachment1.name,
+      facebookUrl: attachment1.url,
+      previewUrl: attachment1.preview_url,
+      previewWidth: attachment1.preview_width,
+      previewHeight: attachment1.preview_height,
+      thumbnailUrl: attachment1.thumbnail_url,
+      ID: attachment2.id.toString(),
+      filename: attachment2.filename,
+      mimeType: attachment2.mime_type,
+      width: attachment2.image_data.width,
+      height: attachment2.image_data.height,
+      url: attachment2.image_data.url,
+      rawGifImage: attachment2.image_data.raw_gif_image,
+      rawWebpImage: attachment2.image_data.raw_webp_image,
+      animatedGifUrl: attachment2.image_data.animated_gif_url,
+      animatedGifPreviewUrl: attachment2.image_data.animated_gif_preview_url,
+      animatedWebpUrl: attachment2.image_data.animated_webp_url,
+      animatedWebpPreviewUrl: attachment2.image_data.animated_webp_preview_url,
+    };
+  case 'share':
+    return {
+      type: 'share',
+      description: attachment1.share.description,
+      ID: attachment1.share.share_id.toString(),
+      subattachments: attachment1.share.subattachments,
+      animatedImageSize: attachment1.share.media.animated_image_size,
+      width: attachment1.share.media.image_size.width,
+      height: attachment1.share.media.image_size.height,
+      image: attachment1.share.media.image,
+      playable: attachment1.share.media.playable,
+      duration: attachment1.share.media.duration,
+      source: attachment1.share.source,
+      title: attachment1.share.title,
+      facebookUrl: attachment1.share.uri,
+      target: attachment1.share.target,
+      styleList: attachment1.share.style_list,
+      url: attachment2.href,
+    };
+  case 'video':
+    return {
+      type: 'video',
+      filename: attachment1.name,
+      thumbnailUrl: attachment1.thumbnail_url,
+      previewUrl: attachment1.preview_url,
+      previewWidth: attachment1.preview_width,
+      previewHeight: attachment1.preview_height,
+      ID: attachment1.metadata.fbid.toString(),
+      url: attachment1.url,
+      width: attachment1.metadata.dimensions.width,
+      height: attachment1.metadata.dimensions.height,
+      duration: attachment1.metadata.duration,
+    };
+  case 'error':
+    return {
+      type: 'error',
 
-        // Save error attachments because we're unsure of their format,
-        // and whether there are cases they contain something useful for debugging.
-        attachment1: attachment1,
-        attachment2: attachment2
-      };
-    case "MessageImage":
-      return {
-        type: "photo",
-        ID: blob.legacy_attachment_id,
-        filename: blob.filename,
-        thumbnailUrl: blob.thumbnail.uri,
+      // Save error attachments because we're unsure of their format,
+      // and whether there are cases they contain something useful for debugging.
+      attachment1: attachment1,
+      attachment2: attachment2
+    };
+  case 'MessageImage':
+    return {
+      type: 'photo',
+      ID: blob.legacy_attachment_id,
+      filename: blob.filename,
+      thumbnailUrl: blob.thumbnail.uri,
 
-        previewUrl: blob.preview.uri,
-        previewWidth: blob.preview.width,
-        previewHeight: blob.preview.height,
+      previewUrl: blob.preview.uri,
+      previewWidth: blob.preview.width,
+      previewHeight: blob.preview.height,
 
-        largePreviewUrl: blob.large_preview.uri,
-        largePreviewWidth: blob.large_preview.width,
-        largePreviewHeight: blob.large_preview.height,
+      largePreviewUrl: blob.large_preview.uri,
+      largePreviewWidth: blob.large_preview.width,
+      largePreviewHeight: blob.large_preview.height,
 
-        url: blob.large_preview.uri,
-        width: blob.original_dimensions.x,
-        height: blob.original_dimensions.y,
-      }
-    case "MessageAnimatedImage":
-      return {
-        type: "animated_image",
-        name: blob.filename,
-        facebookUrl: blob.animated_image.uri,
-        previewUrl: blob.preview_image.uri,
-        previewWidth: blob.preview_image.width,
-        previewHeight: blob.preview_image.height,
-        thumbnailUrl: blob.preview_image.uri,
-        ID: blob.legacy_attachment_id,
-        filename: blob.filename,
-        width: blob.animated_image.width,
-        height: blob.animated_image.height,
-        url: blob.animated_image.uri,
-        rawGifImage: blob.animated_image.uri,
-        animatedGifUrl: blob.animated_image.uri,
-        animatedGifPreviewUrl: blob.preview_image.uri,
-        animatedWebpUrl: blob.animated_image.uri,
-        animatedWebpPreviewUrl: blob.preview_image.uri,
-      };
-    case "MessageVideo":
-      return {
-        type: "video",
-        filename: blob.filename,
-        thumbnailUrl: blob.large_image.uri,
-        previewUrl: blob.large_image.uri,
-        previewWidth: blob.large_image.width,
-        previewHeight: blob.large_image.height,
-        ID: blob.legacy_attachment_id,
-        url: blob.playable_url,
-        width: blob.original_dimensions.x,
-        height: blob.original_dimensions.y,
-        duration: blob.playable_duration_in_ms,
-      };
-    case "MessageAudio":
-      return {
-        type: "audio",
-        audioType: blob.audio_type,
-        isVoiceMail: blob.is_voicemail,
-        filename: blob.filename,
-        ID: blob.url_shimhash,
-        url: blob.playable_url,
-        duration: blob.playable_duration_in_ms,
-      };
-    case "StickerAttachment":
-        return {
-          type: "sticker",
-          url: blob.url,
-          stickerID: blob.id,
-          packID: blob.pack.id,
-          frameCount: blob.frame_count,
-          frameRate: blob.frame_rate,
-          framesPerRow: blob.frames_per_row,
-          framesPerCol: blob.frames_per_column,
-          spriteURI: blob.sprite_image,
-          spriteURI2x: blob.sprite_image_2x,
-          height: blob.height,
-          width: blob.width,
-          caption: blob.label,
-          description: blob.label
-        };
-    case "ExtensibleAttachment":
-      return {
-        type: "share",
-        description: blob.story_attachment.description && blob.story_attachment.description.text,
-        ID: blob.legacy_attachment_id,
-        subattachments: blob.story_attachment.subattachments,
-        width: blob.story_attachment.media && blob.story_attachment.media.image && blob.story_attachment.media.image.width,
-        height: blob.story_attachment.media && blob.story_attachment.media.image && blob.story_attachment.media.image.height,
-        image: blob.story_attachment.media && blob.story_attachment.media.image && blob.story_attachment.media.image.uri,
-        playable: blob.story_attachment.media && blob.story_attachment.media.is_playable,
-        duration: blob.story_attachment.media && blob.story_attachment.media.playable_duration_in_ms,
-        source: blob.story_attachment.source?blob.story_attachment.source.text:null,
-        title: blob.story_attachment.title_with_entities.text,
-        facebookUrl: blob.story_attachment.url,
-        target: blob.story_attachment.target,
-        styleList: blob.story_attachment.style_list,
-        url: blob.story_attachment.url
-      };
-    case "MessageFile":
-      return {
-        type: "file",
-        name: blob.filename,
-        url: blob.url,
-        ID: blob.message_file_fbid,
-        isMalicious: blob.is_malicious,
-        mimeType: blob.content_type,
-      };
-    default:
-      throw new Error("unrecognized attach_file of type " + type +  "`" + JSON.stringify(attachment1, null, 4) + " attachment2: " + JSON.stringify(attachment2, null, 4) + "`");
+      url: blob.large_preview.uri,
+      width: blob.original_dimensions.x,
+      height: blob.original_dimensions.y,
+    };
+  case 'MessageAnimatedImage':
+    return {
+      type: 'animated_image',
+      name: blob.filename,
+      facebookUrl: blob.animated_image.uri,
+      previewUrl: blob.preview_image.uri,
+      previewWidth: blob.preview_image.width,
+      previewHeight: blob.preview_image.height,
+      thumbnailUrl: blob.preview_image.uri,
+      ID: blob.legacy_attachment_id,
+      filename: blob.filename,
+      width: blob.animated_image.width,
+      height: blob.animated_image.height,
+      url: blob.animated_image.uri,
+      rawGifImage: blob.animated_image.uri,
+      animatedGifUrl: blob.animated_image.uri,
+      animatedGifPreviewUrl: blob.preview_image.uri,
+      animatedWebpUrl: blob.animated_image.uri,
+      animatedWebpPreviewUrl: blob.preview_image.uri,
+    };
+  case 'MessageVideo':
+    return {
+      type: 'video',
+      filename: blob.filename,
+      thumbnailUrl: blob.large_image.uri,
+      previewUrl: blob.large_image.uri,
+      previewWidth: blob.large_image.width,
+      previewHeight: blob.large_image.height,
+      ID: blob.legacy_attachment_id,
+      url: blob.playable_url,
+      width: blob.original_dimensions.x,
+      height: blob.original_dimensions.y,
+      duration: blob.playable_duration_in_ms,
+    };
+  case 'MessageAudio':
+    return {
+      type: 'audio',
+      audioType: blob.audio_type,
+      isVoiceMail: blob.is_voicemail,
+      filename: blob.filename,
+      ID: blob.url_shimhash,
+      url: blob.playable_url,
+      duration: blob.playable_duration_in_ms,
+    };
+  case 'StickerAttachment':
+    return {
+      type: 'sticker',
+      url: blob.url,
+      stickerID: blob.id,
+      packID: blob.pack.id,
+      frameCount: blob.frame_count,
+      frameRate: blob.frame_rate,
+      framesPerRow: blob.frames_per_row,
+      framesPerCol: blob.frames_per_column,
+      spriteURI: blob.sprite_image,
+      spriteURI2x: blob.sprite_image_2x,
+      height: blob.height,
+      width: blob.width,
+      caption: blob.label,
+      description: blob.label
+    };
+  case 'ExtensibleAttachment':
+    return {
+      type: 'share',
+      description: blob.story_attachment.description && blob.story_attachment.description.text,
+      ID: blob.legacy_attachment_id,
+      subattachments: blob.story_attachment.subattachments,
+      width: blob.story_attachment.media && blob.story_attachment.media.image && blob.story_attachment.media.image.width,
+      height: blob.story_attachment.media && blob.story_attachment.media.image && blob.story_attachment.media.image.height,
+      image: blob.story_attachment.media && blob.story_attachment.media.image && blob.story_attachment.media.image.uri,
+      playable: blob.story_attachment.media && blob.story_attachment.media.is_playable,
+      duration: blob.story_attachment.media && blob.story_attachment.media.playable_duration_in_ms,
+      source: blob.story_attachment.source?blob.story_attachment.source.text:null,
+      title: blob.story_attachment.title_with_entities.text,
+      facebookUrl: blob.story_attachment.url,
+      target: blob.story_attachment.target,
+      styleList: blob.story_attachment.style_list,
+      url: blob.story_attachment.url
+    };
+  case 'MessageFile':
+    return {
+      type: 'file',
+      name: blob.filename,
+      url: blob.url,
+      ID: blob.message_file_fbid,
+      isMalicious: blob.is_malicious,
+      mimeType: blob.content_type,
+    };
+  default:
+    throw new Error('unrecognized attach_file of type ' + type +  '`' + JSON.stringify(attachment1, null, 4) + ' attachment2: ' + JSON.stringify(attachment2, null, 4) + '`');
   }
 }
 
@@ -494,21 +488,21 @@ function formatDeltaMessage(m){
   }
 
   return {
-    type: "message",
+    type: 'message',
     senderID: formatID(md.actorFbId.toString()),
-    body: m.delta.body || "",
+    body: m.delta.body || '',
     threadID: formatID((md.threadKey.threadFbId || md.threadKey.otherUserFbId).toString()),
     messageID: md.messageId,
     attachments: (m.delta.attachments || []).map(v => _formatAttachment(v)),
     mentions: mentions,
     timestamp: md.timestamp,
     isGroup: !!md.threadKey.threadFbId
-  }
+  };
 }
 
 function formatID(id){
   if(id != undefined && id != null){
-    return id.replace(/(fb)?id[:.]/, "");
+    return id.replace(/(fb)?id[:.]/, '');
   }else{
     return id;
   }
@@ -517,12 +511,12 @@ function formatID(id){
 function formatMessage(m) {
   var originalMessage = m.message ? m.message : m;
   var obj = {
-    type: "message",
+    type: 'message',
     senderName: originalMessage.sender_name,
     senderID: formatID(originalMessage.sender_fbid.toString()),
     participantNames: (originalMessage.group_thread_info ? originalMessage.group_thread_info.participant_names : [originalMessage.sender_name.split(' ')[0]]),
     participantIDs: (originalMessage.group_thread_info ? originalMessage.group_thread_info.participant_ids.map(function(v) {return formatID(v.toString());}) : [formatID(originalMessage.sender_fbid)]),
-    body: originalMessage.body || "",
+    body: originalMessage.body || '',
     threadID: formatID((originalMessage.thread_fbid || originalMessage.other_user_fbid).toString()),
     threadName: (originalMessage.group_thread_info ? originalMessage.group_thread_info.name : originalMessage.sender_name),
     location: originalMessage.coordinates ? originalMessage.coordinates : null,
@@ -537,7 +531,7 @@ function formatMessage(m) {
     isUnread: originalMessage.is_unread
   };
 
-  if(m.type === "pages_messaging") obj.pageID = m.realtime_viewer_fbid.toString();
+  if(m.type === 'pages_messaging') obj.pageID = m.realtime_viewer_fbid.toString();
   obj.isGroup = obj.participantIDs.length > 2;
 
   return obj;
@@ -557,7 +551,7 @@ function formatEvent(m) {
   return Object.assign(
     formatMessage(originalMessage),
     {
-      type: "event",
+      type: 'event',
       logMessageType: logMessageType,
       logMessageData: logMessageData,
       logMessageBody: originalMessage.log_message_body
@@ -567,24 +561,24 @@ function formatEvent(m) {
 
 function formatHistoryMessage(m) {
   switch(m.action_type) {
-    case "ma-type:log-message":
-      return formatEvent(m);
-    default:
-      return formatMessage(m);
+  case 'ma-type:log-message':
+    return formatEvent(m);
+  default:
+    return formatMessage(m);
   }
 }
 
 // Get a more readable message type for AdminTextMessages
 function getAdminTextMessageType(type) {
   switch (type) {
-    case 'change_thread_theme':
-      return "log:thread-color";
-    case 'change_thread_nickname':
-      return "log:user-nickname";
-    case 'change_thread_icon':
-      return "log:thread-icon";
-    default:
-      return type;
+  case 'change_thread_theme':
+    return 'log:thread-color';
+  case 'change_thread_nickname':
+    return 'log:user-nickname';
+  case 'change_thread_icon':
+    return 'log:thread-icon';
+  default:
+    return type;
   }
 }
 
@@ -600,26 +594,26 @@ function formatDeltaEvent(m) {
   // log:unsubscribe => {leftParticipantFbId}
 
   switch (m.class) {
-    case 'AdminTextMessage':
-      logMessageData = m.untypedData;
-      logMessageType = getAdminTextMessageType(m.type);
-      break;
-    case 'ThreadName':
-      logMessageType = "log:thread-name";
-      logMessageData = { name: m.name };
-      break;
-    case 'ParticipantsAddedToGroupThread':
-      logMessageType = "log:subscribe";
-      logMessageData = { addedParticipants: m.addedParticipants }
-      break;
-    case 'ParticipantLeftGroupThread':
-      logMessageType = "log:unsubscribe";
-      logMessageData = { leftParticipantFbId: m.leftParticipantFbId }
-      break;
+  case 'AdminTextMessage':
+    logMessageData = m.untypedData;
+    logMessageType = getAdminTextMessageType(m.type);
+    break;
+  case 'ThreadName':
+    logMessageType = 'log:thread-name';
+    logMessageData = { name: m.name };
+    break;
+  case 'ParticipantsAddedToGroupThread':
+    logMessageType = 'log:subscribe';
+    logMessageData = { addedParticipants: m.addedParticipants };
+    break;
+  case 'ParticipantLeftGroupThread':
+    logMessageType = 'log:unsubscribe';
+    logMessageData = { leftParticipantFbId: m.leftParticipantFbId };
+    break;
   }
 
   return {
-    type: "event",
+    type: 'event',
     threadID: formatID((m.messageMetadata.threadKey.threadFbId || m.messageMetadata.threadKey.otherUserFbId).toString()),
     logMessageType: logMessageType,
     logMessageData: logMessageData,
@@ -671,28 +665,28 @@ function formatRead(event) {
 
 function getFrom(str, startToken, endToken) {
   var start = str.indexOf(startToken) + startToken.length;
-  if(start < startToken.length) return "";
+  if(start < startToken.length) return '';
 
   var lastHalf = str.substring(start);
   var end = lastHalf.indexOf(endToken);
   if (end === -1) {
-    throw Error("Could not find endTime `" + endToken + "` in the given string.");
+    throw Error('Could not find endTime `' + endToken + '` in the given string.');
   }
   return lastHalf.substring(0, end);
 }
 
 function makeParsable(html) {
-  var withoutForLoop = html.replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, "");
+  var withoutForLoop = html.replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, '');
 
   // (What the fuck FB, why windows style newlines?)
   // So sometimes FB will send us base multiple objects in the same response.
   // They're all valid JSON, one after the other, at the top level. We detect
   // that and make it parse-able by JSON.parse.
   //       Ben - July 15th 2017
-  var maybeMultipleObjects = withoutForLoop.split("}\r\n{");
+  var maybeMultipleObjects = withoutForLoop.split('}\r\n{');
   if (maybeMultipleObjects.length === 1) return maybeMultipleObjects;
 
-  return "[" + maybeMultipleObjects.join("},{") + "]";
+  return '[' + maybeMultipleObjects.join('},{') + ']';
 }
 
 function arrToForm(form) {
@@ -712,12 +706,12 @@ function getSignatureID(){
 
 function generateTimestampRelative() {
   var d = new Date();
-  return d.getHours() + ":" + padZeros(d.getMinutes());
+  return d.getHours() + ':' + padZeros(d.getMinutes());
 }
 
 function makeDefaults(html, userID, ctx) {
   var reqCounter = 1;
-  var fb_dtsg = getFrom(html, "name=\"fb_dtsg\" value=\"", "\"");
+  var fb_dtsg = getFrom(html, 'name="fb_dtsg" value="', '"');
 
   // @Hack Ok we've done hacky things, this is definitely on top 5.
   // We totally assume the object is flat and try parsing until a }.
@@ -734,11 +728,11 @@ function makeDefaults(html, userID, ctx) {
   //   siteData = {};
   // }
 
-  var ttstamp = "2";
+  var ttstamp = '2';
   for (var i = 0; i < fb_dtsg.length; i++) {
     ttstamp += fb_dtsg.charCodeAt(i);
   }
-  var revision = getFrom(html, "revision\":",",");
+  var revision = getFrom(html, 'revision":',',');
 
   function mergeWithDefaults(obj) {
     // @TODO This is missing a key called __dyn.
@@ -811,20 +805,20 @@ function parseAndCheckLogin(ctx, defaultFuncs, retryCount) {
   }
   return function(data) {
     return bluebird.try(function() {
-      log.verbose("parseAndCheckLogin", data.body);
+      log.verbose('parseAndCheckLogin', data.body);
       if (data.statusCode >= 500 && data.statusCode < 600) {
         if (retryCount >= 5) {
           throw {
-            error: "Request retry failed. Check the `res` and `statusCode` property on this error.",
+            error: 'Request retry failed. Check the `res` and `statusCode` property on this error.',
             statusCode: data.statusCode,
             res: data.body
           };
         }
         retryCount++;
         var retryTime = Math.floor(Math.random() * 5000);
-        log.warn("parseAndCheckLogin", "Got status code " + data.statusCode + " - " + retryCount + ". attempt to retry in " + retryTime + " milliseconds...");
-        var url = data.request.uri.protocol + "//" + data.request.uri.hostname + data.request.uri.pathname;
-        if (data.request.headers['Content-Type'].split(";")[0] === "multipart/form-data") {
+        log.warn('parseAndCheckLogin', 'Got status code ' + data.statusCode + ' - ' + retryCount + '. attempt to retry in ' + retryTime + ' milliseconds...');
+        var url = data.request.uri.protocol + '//' + data.request.uri.hostname + data.request.uri.pathname;
+        if (data.request.headers['Content-Type'].split(';')[0] === 'multipart/form-data') {
           return bluebird
             .delay(retryTime)
             .then(function() {
@@ -840,14 +834,14 @@ function parseAndCheckLogin(ctx, defaultFuncs, retryCount) {
             .then(parseAndCheckLogin(ctx, defaultFuncs, retryCount));
         }
       }
-      if (data.statusCode !== 200) throw new Error("parseAndCheckLogin got status code: " + data.statusCode + ". Bailing out of trying to parse response.");
+      if (data.statusCode !== 200) throw new Error('parseAndCheckLogin got status code: ' + data.statusCode + '. Bailing out of trying to parse response.');
 
       var res = null;
       try {
         res = JSON.parse(makeParsable(data.body));
       } catch(e) {
         throw {
-          error: "JSON.parse error. Check the `detail` property on this error.",
+          error: 'JSON.parse error. Check the `detail` property on this error.',
           detail: e,
           res: data.body
         };
@@ -857,12 +851,12 @@ function parseAndCheckLogin(ctx, defaultFuncs, retryCount) {
       if (res.jsmods
           && res.jsmods.require
           && Array.isArray(res.jsmods.require[0])
-          && res.jsmods.require[0][0] === "Cookie") {
-        res.jsmods.require[0][3][0] = res.jsmods.require[0][3][0].replace("_js_", "");
-        var cookie = formatCookie(res.jsmods.require[0][3], "facebook");
-        var cookie2 = formatCookie(res.jsmods.require[0][3], "messenger");
-        ctx.jar.setCookie(cookie, "https://www.facebook.com");
-        ctx.jar.setCookie(cookie2, "https://www.messenger.com");
+          && res.jsmods.require[0][0] === 'Cookie') {
+        res.jsmods.require[0][3][0] = res.jsmods.require[0][3][0].replace('_js_', '');
+        var cookie = formatCookie(res.jsmods.require[0][3], 'facebook');
+        var cookie2 = formatCookie(res.jsmods.require[0][3], 'messenger');
+        ctx.jar.setCookie(cookie, 'https://www.facebook.com');
+        ctx.jar.setCookie(cookie2, 'https://www.messenger.com');
       }
 
       // On every request we check if we got a DTSG and we mutate the context so that we use the latest
@@ -871,13 +865,13 @@ function parseAndCheckLogin(ctx, defaultFuncs, retryCount) {
           && Array.isArray(res.jsmods.require)) {
         var arr = res.jsmods.require;
         for(var i in arr) {
-          if (arr[i][0] === "DTSG" && arr[i][1] === "setToken") {
+          if (arr[i][0] === 'DTSG' && arr[i][1] === 'setToken') {
             ctx.fb_dtsg = arr[i][3][0];
 
             // Update ttstamp since that depends on fb_dtsg
-            ctx.ttstamp = "2";
-            for (var i = 0; i < ctx.fb_dtsg.length; i++) {
-              ctx.ttstamp += ctx.fb_dtsg.charCodeAt(i);
+            ctx.ttstamp = '2';
+            for (var j = 0; j < ctx.fb_dtsg.length; j++) {
+              ctx.ttstamp += ctx.fb_dtsg.charCodeAt(j);
             }
           }
         }
@@ -885,7 +879,7 @@ function parseAndCheckLogin(ctx, defaultFuncs, retryCount) {
       }
 
       if (res.error === 1357001) {
-        throw {error: "Not logged in."};
+        throw {error: 'Not logged in.'};
       }
       return res;
     });
@@ -896,11 +890,11 @@ function saveCookies(jar) {
   return function(res) {
     var cookies = res.headers['set-cookie'] || [];
     cookies.forEach(function (c) {
-      if (c.indexOf(".facebook.com") > -1) {
-        jar.setCookie(c, "https://www.facebook.com");
+      if (c.indexOf('.facebook.com') > -1) {
+        jar.setCookie(c, 'https://www.facebook.com');
       }
-      var c2 = c.replace(/domain=\.facebook\.com/, "domain=.messenger.com");
-      jar.setCookie(c2, "https://www.messenger.com");
+      var c2 = c.replace(/domain=\.facebook\.com/, 'domain=.messenger.com');
+      jar.setCookie(c2, 'https://www.messenger.com');
     });
     return res;
   };
@@ -923,7 +917,7 @@ function formatDate(date) {
 }
 
 function formatCookie(arr, url) {
-  return arr[0]+"="+arr[1]+"; Path=" + arr[3] + "; Domain="+url+".com";
+  return arr[0]+'='+arr[1]+'; Path=' + arr[3] + '; Domain='+url+'.com';
 }
 
 function formatThread(data) {
@@ -970,7 +964,7 @@ function getType(obj) {
 function formatProxyPresence(presence, userID) {
   if(presence.lat === undefined || presence.p === undefined) return null;
   return {
-    type: "presence",
+    type: 'presence',
     timestamp: presence.lat * 1000,
     userID: userID,
     statuses: presence.p
@@ -979,7 +973,7 @@ function formatProxyPresence(presence, userID) {
 
 function formatPresence(presence, userID) {
   return {
-    type: "presence",
+    type: 'presence',
     timestamp: presence.la * 1000,
     userID: userID,
     statuses: presence.a
@@ -995,45 +989,44 @@ function decodeClientPayload(payload) {
 
 function getAppState(jar){
   return jar
-    .getCookies("https://www.facebook.com")
-    .concat(jar.getCookies("https://facebook.com"))
-    .concat(jar.getCookies("https://www.messenger.com"));
+    .getCookies('https://www.facebook.com')
+    .concat(jar.getCookies('https://facebook.com'))
+    .concat(jar.getCookies('https://www.messenger.com'));
 }
 module.exports = {
-        isReadableStream, 
-        get, 
-        post, 
-        postFormData, 
-        generateThreadingID, 
-        generateOfflineThreadingID, 
-        getGUID, 
-        getFrom, 
-        makeParsable, 
-        arrToForm, 
-        getSignatureID, 
-        getJar: request.jar,
-        generateTimestampRelative, 
-        makeDefaults, 
-        parseAndCheckLogin, 
-        saveCookies, 
-        getType, 
-        formatHistoryMessage, 
-        formatID, 
-        formatMessage, 
-        formatDeltaEvent, 
-        formatDeltaMessage, 
-        formatProxyPresence, 
-        formatPresence, 
-        formatTyp, 
-        formatDeltaReadReceipt, 
-        formatCookie, 
-        formatThread, 
-        formatReadReceipt, 
-        formatRead, 
-        generatePresence, 
-        generateAccessiblityCookie, 
-        formatDate, 
-        decodeClientPayload, 
-        getAppState
-}
-
+  isReadableStream,
+  get,
+  post,
+  postFormData,
+  generateThreadingID,
+  generateOfflineThreadingID,
+  getGUID,
+  getFrom,
+  makeParsable,
+  arrToForm,
+  getSignatureID,
+  getJar: request.jar,
+  generateTimestampRelative,
+  makeDefaults,
+  parseAndCheckLogin,
+  saveCookies,
+  getType,
+  formatHistoryMessage,
+  formatID,
+  formatMessage,
+  formatDeltaEvent,
+  formatDeltaMessage,
+  formatProxyPresence,
+  formatPresence,
+  formatTyp,
+  formatDeltaReadReceipt,
+  formatCookie,
+  formatThread,
+  formatReadReceipt,
+  formatRead,
+  generatePresence,
+  generateAccessiblityCookie,
+  formatDate,
+  decodeClientPayload,
+  getAppState
+};

@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   // muteSecond: -1=permanent mute, 0=unmute, 60=one minute, 3600=one hour, etc.
@@ -13,10 +13,10 @@ module.exports = function(defaultFuncs, api, ctx) {
     var form = {
       thread_fbid: threadID,
       mute_settings: muteSeconds
-    }
+    };
 
     defaultFuncs
-      .post("https://www.facebook.com/ajax/mercury/change_mute_thread.php", ctx.jar, form)
+      .post('https://www.facebook.com/ajax/mercury/change_mute_thread.php', ctx.jar, form)
       .then(utils.saveCookies(ctx.jar))
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
@@ -27,7 +27,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         return callback();
       })
       .catch(function(err) {
-        log.error("muteThread", err);
+        log.error('muteThread', err);
         return callback(err);
       });
   };

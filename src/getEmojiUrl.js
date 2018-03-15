@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-const util = require("util");
+const util = require('util');
 
 module.exports = function() {
   return function getEmojiUrl(c, size, pixelRatio) {

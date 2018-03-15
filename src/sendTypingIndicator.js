@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   function makeTypingIndicator(typ, threadID, callback) {
@@ -25,7 +25,7 @@ module.exports = function(defaultFuncs, api, ctx) {
       }
 
       defaultFuncs
-        .post("https://www.facebook.com/ajax/messaging/typ.php", ctx.jar, form)
+        .post('https://www.facebook.com/ajax/messaging/typ.php', ctx.jar, form)
         .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
         .then(function(resData) {
           if(resData.error) {
@@ -35,7 +35,7 @@ module.exports = function(defaultFuncs, api, ctx) {
           return callback();
         })
         .catch(function(err) {
-          log.error("sendTypingIndicator", err);
+          log.error('sendTypingIndicator', err);
           return callback(err);
         });
     });
@@ -44,7 +44,7 @@ module.exports = function(defaultFuncs, api, ctx) {
   return function sendTypingIndicator(threadID, callback) {
     if (utils.getType(callback) !== 'Function' && utils.getType(callback) !== 'AsyncFunction') {
       if (callback) {
-        log.warn("sendTypingIndicator", "callback is not a function - ignoring.");
+        log.warn('sendTypingIndicator', 'callback is not a function - ignoring.');
       }
       callback = () => {};
     }
@@ -54,7 +54,7 @@ module.exports = function(defaultFuncs, api, ctx) {
     return function end(cb) {
       if (utils.getType(cb) !== 'Function' && utils.getType(cb) !== 'AsyncFunction') {
         if (cb) {
-          log.warn("sendTypingIndicator", "callback is not a function - ignoring.");
+          log.warn('sendTypingIndicator', 'callback is not a function - ignoring.');
         }
         cb = () => {};
       }

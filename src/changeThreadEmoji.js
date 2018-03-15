@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function changeThreadEmoji(emoji, threadID, callback) {
@@ -14,11 +14,11 @@ module.exports = function(defaultFuncs, api, ctx) {
     };
 
     defaultFuncs
-      .post("https://www.messenger.com/messaging/save_thread_emoji/?source=thread_settings&__pc=EXP1%3Amessengerdotcom_pkg", ctx.jar, form)
+      .post('https://www.messenger.com/messaging/save_thread_emoji/?source=thread_settings&__pc=EXP1%3Amessengerdotcom_pkg', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         if (resData.error === 1357031) {
-          throw {error: "Trying to change emoji of a chat that doesn't exist. Have at least one message in the thread before trying to change the emoji."};
+          throw {error: 'Trying to change emoji of a chat that doesn\'t exist. Have at least one message in the thread before trying to change the emoji.'};
         }
         if (resData.error) {
           throw resData;
@@ -27,7 +27,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         return callback();
       })
       .catch(function(err) {
-        log.error("changeThreadEmoji", err);
+        log.error('changeThreadEmoji', err);
         return callback(err);
       });
   };

@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function changeThreadColor(color, threadID, callback) {
@@ -14,7 +14,7 @@ module.exports = function(defaultFuncs, api, ctx) {
       return api.threadColors[name];
     });
     if(!colorList.includes(validatedColor)) {
-        throw {error: "The color you are trying to use is not a valid thread color. Use api.threadColors to find acceptable values."};
+      throw {error: 'The color you are trying to use is not a valid thread color. Use api.threadColors to find acceptable values.'};
     }
 
     var form = {
@@ -23,11 +23,11 @@ module.exports = function(defaultFuncs, api, ctx) {
     };
 
     defaultFuncs
-      .post("https://www.messenger.com/messaging/save_thread_color/?source=thread_settings&dpr=1", ctx.jar, form)
+      .post('https://www.messenger.com/messaging/save_thread_color/?source=thread_settings&dpr=1', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         if (resData.error === 1357031) {
-          throw {error: "Trying to change colors of a chat that doesn't exist. Have at least one message in the thread before trying to change the colors."};
+          throw {error: 'Trying to change colors of a chat that doesn\'t exist. Have at least one message in the thread before trying to change the colors.'};
         }
         if (resData.error) {
           throw resData;
@@ -36,7 +36,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         return callback();
       })
       .catch(function(err) {
-        log.error("changeThreadColor", err);
+        log.error('changeThreadColor', err);
         return callback(err);
       });
   };

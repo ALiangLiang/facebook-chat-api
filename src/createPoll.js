@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function createPoll(title, threadID, options, callback) {
     if(!callback) {
-      if(utils.getType(options) == "Function") {
+      if(utils.getType(options) == 'Function') {
         callback = options;
       } else {
         callback = function() {};
@@ -32,7 +32,7 @@ module.exports = function(defaultFuncs, api, ctx) {
     }
 
     defaultFuncs
-      .post("https://www.messenger.com/messaging/group_polling/create_poll/?dpr=1", ctx.jar, form)
+      .post('https://www.messenger.com/messaging/group_polling/create_poll/?dpr=1', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         if (resData.payload.status != 'success') {
@@ -42,7 +42,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         return callback();
       })
       .catch(function(err) {
-        log.error("createPoll", err);
+        log.error('createPoll', err);
         return callback(err);
       });
   };

@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
+var utils = require('../utils');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function searchForThread(name, callback) {
     if (!callback) {
-      throw {error: "searchForThread: need callback"};
+      throw {error: 'searchForThread: need callback'};
     }
 
     var tmpForm = {
@@ -24,7 +24,7 @@ module.exports = function(defaultFuncs, api, ctx) {
           throw resData;
         }
         if (!resData.payload.mercury_payload.threads){
-          return callback({error: "Could not find thread `"+name+"`."});
+          return callback({error: 'Could not find thread `'+name+'`.'});
         }
         return callback(null, resData.payload.mercury_payload
           .threads.map(utils.formatThread));

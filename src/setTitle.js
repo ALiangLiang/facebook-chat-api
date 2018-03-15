@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function setTitle(newTitle, threadID, callback) {
     if(!callback && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
-      throw {error: "please pass a threadID as a second argument."};
+      throw {error: 'please pass a threadID as a second argument.'};
     }
 
     if(!callback) {
@@ -43,15 +43,15 @@ module.exports = function(defaultFuncs, api, ctx) {
     };
 
     defaultFuncs
-      .post("https://www.facebook.com/messaging/send/", ctx.jar, form)
+      .post('https://www.facebook.com/messaging/send/', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         if (resData.error && resData.error === 1545012){
-          throw {error: "Cannot change chat title: Not member of chat."};
+          throw {error: 'Cannot change chat title: Not member of chat.'};
         }
 
         if (resData.error && resData.error === 1545003){
-          throw {error: "Cannot set title of single-user chat."};
+          throw {error: 'Cannot set title of single-user chat.'};
         }
 
         if (resData.error) {
@@ -61,7 +61,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         return callback();
       })
       .catch(function(err) {
-        log.error("setTitle", err);
+        log.error('setTitle', err);
         return callback(err);
       });
   };

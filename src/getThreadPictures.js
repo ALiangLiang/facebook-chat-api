@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function getThreadPictures(threadID, offset, limit, callback) {
     if(!callback) {
-      throw {error: "getThreadPictures: need callback"};
+      throw {error: 'getThreadPictures: need callback'};
     }
 
     var form = {
@@ -16,7 +16,7 @@ module.exports = function(defaultFuncs, api, ctx) {
     };
 
     defaultFuncs
-      .post("https://www.facebook.com/ajax/messaging/attachments/sharedphotos.php", ctx.jar, form)
+      .post('https://www.facebook.com/ajax/messaging/attachments/sharedphotos.php', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         if (resData.error) {
@@ -28,7 +28,7 @@ module.exports = function(defaultFuncs, api, ctx) {
             'image_id': image.fbid
           };
           return defaultFuncs
-            .post("https://www.facebook.com/ajax/messaging/attachments/sharedphotos.php", ctx.jar, form)
+            .post('https://www.facebook.com/ajax/messaging/attachments/sharedphotos.php', ctx.jar, form)
             .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
             .then(function(resData) {
               if (resData.error) {
@@ -45,7 +45,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         callback(null, resData);
       })
       .catch(function(err) {
-        log.error("Error in getThreadPictures", err);
+        log.error('Error in getThreadPictures', err);
         callback(err);
       });
   };

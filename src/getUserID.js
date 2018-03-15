@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 function formatData(data) {
   return {
@@ -20,20 +20,20 @@ function formatData(data) {
 module.exports = function(defaultFuncs, api, ctx) {
   return function getUserID(name, callback) {
     if(!callback) {
-      throw {error: "getUserID: need callback"};
+      throw {error: 'getUserID: need callback'};
     }
 
     var form = {
       'value' : name.toLowerCase(),
       'viewer' : ctx.userID,
-      'rsp' : "search",
-      'context' : "search",
-      'path' : "/home.php",
+      'rsp' : 'search',
+      'context' : 'search',
+      'path' : '/home.php',
       'request_id' : utils.getGUID(),
     };
 
     defaultFuncs
-      .get("https://www.facebook.com/ajax/typeahead/search.php", ctx.jar, form)
+      .get('https://www.facebook.com/ajax/typeahead/search.php', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         if (resData.error) {
@@ -45,7 +45,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         callback(null, data.map(formatData));
       })
       .catch(function(err) {
-        log.error("getUserID", err);
+        log.error('getUserID', err);
         return callback(err);
       });
   };

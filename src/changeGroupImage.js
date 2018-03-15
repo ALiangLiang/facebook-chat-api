@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
-var bluebird = require("bluebird");
+var utils = require('../utils');
+var log = require('npmlog');
+var bluebird = require('bluebird');
 
 module.exports = function(defaultFuncs, api, ctx) {
   function handleUpload(image, callback) {
@@ -14,7 +14,7 @@ module.exports = function(defaultFuncs, api, ctx) {
     };
 
     uploads.push(defaultFuncs
-      .postFormData("https://upload.facebook.com/ajax/mercury/upload.php", ctx.jar, form, {})
+      .postFormData('https://upload.facebook.com/ajax/mercury/upload.php', ctx.jar, form, {})
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function (resData) {
         if (resData.error) {
@@ -31,14 +31,14 @@ module.exports = function(defaultFuncs, api, ctx) {
         callback(null, resData);
       })
       .catch(function(err) {
-        log.error("handleUpload", err);
+        log.error('handleUpload', err);
         return callback(err);
       });
   }
 
   return function changeGroupImage(image, threadID, callback) {
     if(!callback && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
-      throw {error: "please pass a threadID as a second argument."};
+      throw {error: 'please pass a threadID as a second argument.'};
     }
 
     if(!callback) {
@@ -87,7 +87,7 @@ module.exports = function(defaultFuncs, api, ctx) {
       form['log_message_data[image][src]'] = payload[0]['src'];
 
       defaultFuncs
-        .post("https://www.facebook.com/messaging/send/", ctx.jar, form)
+        .post('https://www.facebook.com/messaging/send/', ctx.jar, form)
         .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
         .then(function(resData) {
           // check for errors here
@@ -99,7 +99,7 @@ module.exports = function(defaultFuncs, api, ctx) {
           return callback();
         })
         .catch(function(err) {
-          log.error("changeGroupImage", err);
+          log.error('changeGroupImage', err);
           return callback(err);
         });
 

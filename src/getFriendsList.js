@@ -1,8 +1,7 @@
-"use strict";
+'use strict';
 
-var cheerio = require("cheerio");
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 // [almost] copy pasted from one of FB's minified file (GenderConst)
 var GENDERS = {
@@ -35,22 +34,22 @@ function formatData(obj) {
       profileUrl: user.uri,
       vanity: user.vanity,
       isBirthday: !!user.is_birthday,
-    }
+    };
   });
 }
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function getFriendsList(callback) {
     if(!callback) {
-      throw {error: "getFriendsList: need callback"};
+      throw {error: 'getFriendsList: need callback'};
     }
 
     defaultFuncs
-      .postFormData("https://www.facebook.com/chat/user_info_all", ctx.jar, {}, {viewer: ctx.userID})
+      .postFormData('https://www.facebook.com/chat/user_info_all', ctx.jar, {}, {viewer: ctx.userID})
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         if (!resData) {
-          throw {error: "getFriendsList returned empty object."};
+          throw {error: 'getFriendsList returned empty object.'};
         }
         if(resData.error) {
           throw resData;
@@ -58,7 +57,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         callback(null, formatData(resData.payload));
       })
       .catch(function(err) {
-        log.error("getFriendsList", err);
+        log.error('getFriendsList', err);
         return callback(err);
       });
   };

@@ -13,7 +13,7 @@ var userIDs = conf.userIDs;
 var options = {
   selfListen: true,
   listenEvents: true,
-  logLevel: "silent",
+  logLevel: 'silent',
   pageID: conf.pageID
 };
 var getType = require('../utils').getType;

@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function forwardAttachment(attachmentID, userOrUsers, callback) {
@@ -13,7 +13,7 @@ module.exports = function(defaultFuncs, api, ctx) {
       attachment_id: attachmentID,
     };
 
-    if(utils.getType(userOrUsers) !== "Array") {
+    if(utils.getType(userOrUsers) !== 'Array') {
       userOrUsers = [userOrUsers];
     }
     
@@ -26,7 +26,7 @@ module.exports = function(defaultFuncs, api, ctx) {
     }
 
     defaultFuncs
-      .post("https://www.messenger.com/mercury/attachments/forward/", ctx.jar, form)
+      .post('https://www.messenger.com/mercury/attachments/forward/', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx.jar, defaultFuncs))
       .then(function(resData) {
         if (resData.error) {
@@ -36,7 +36,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         return callback(null);
       })
       .catch(function(err) {
-        log.error("forwardAttachment", err);
+        log.error('forwardAttachment', err);
         return callback(err);
       });
   };

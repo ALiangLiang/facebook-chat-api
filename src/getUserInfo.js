@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 function formatData(data) {
   var retObj = {};
@@ -19,7 +19,7 @@ function formatData(data) {
         type: innerObj.type,
         isFriend: innerObj.is_friend,
         isBirthday: !!innerObj.is_birthday,
-      }
+      };
     }
   }
 
@@ -29,7 +29,7 @@ function formatData(data) {
 module.exports = function(defaultFuncs, api, ctx) {
   return function getUserInfo(id, callback) {
     if(!callback) {
-      throw {error: "getUserInfo: need callback"};
+      throw {error: 'getUserInfo: need callback'};
     }
 
     if(utils.getType(id) !== 'Array') {
@@ -38,19 +38,19 @@ module.exports = function(defaultFuncs, api, ctx) {
 
     var form = {};
     id.map(function(v, i) {
-      form["ids[" + i + "]"] = v;
+      form['ids[' + i + ']'] = v;
     });
-    defaultFuncs.post("https://www.facebook.com/chat/user_info/", ctx.jar, form)
-    .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
-    .then(function(resData) {
-      if (resData.error) {
-        throw resData;
-      }
-      return callback(null, formatData(resData.payload.profiles));
-    })
-    .catch(function(err) {
-      log.error("getUserInfo", err);
-      return callback(err);
-    });
+    defaultFuncs.post('https://www.facebook.com/chat/user_info/', ctx.jar, form)
+      .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
+      .then(function(resData) {
+        if (resData.error) {
+          throw resData;
+        }
+        return callback(null, formatData(resData.payload.profiles));
+      })
+      .catch(function(err) {
+        log.error('getUserInfo', err);
+        return callback(err);
+      });
   };
 };

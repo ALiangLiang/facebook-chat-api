@@ -1,14 +1,14 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function logout(callback) {
     callback = callback || function() {};
 
     var form = {
-      pmid: "0"
+      pmid: '0'
     };
 
     defaultFuncs
@@ -16,7 +16,7 @@ module.exports = function(defaultFuncs, api, ctx) {
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
         var elem = resData.jsmods.instances[0][2][0].filter(function(v) {
-          return v.value === "logout";
+          return v.value === 'logout';
         })[0];
 
         var html = resData.jsmods.markup.filter(function(v) {
@@ -24,9 +24,9 @@ module.exports = function(defaultFuncs, api, ctx) {
         })[0][1].__html;
 
         var form = {
-          fb_dtsg: utils.getFrom(html, "\"fb_dtsg\" value=\"", "\""),
-          ref: utils.getFrom(html, "\"ref\" value=\"", "\""),
-          h: utils.getFrom(html, "\"h\" value=\"", "\""),
+          fb_dtsg: utils.getFrom(html, '"fb_dtsg" value="', '"'),
+          ref: utils.getFrom(html, '"ref" value="', '"'),
+          h: utils.getFrom(html, '"h" value="', '"'),
         };
 
         return utils
@@ -35,7 +35,7 @@ module.exports = function(defaultFuncs, api, ctx) {
       })
       .then(function(res) {
         if(!res.headers) {
-          throw {error: "An error occurred when logging out."};
+          throw {error: 'An error occurred when logging out.'};
         }
 
         return utils
@@ -44,11 +44,11 @@ module.exports = function(defaultFuncs, api, ctx) {
       })
       .then(function() {
         ctx.loggedIn = false;
-        log.info("logout", "Logged out successfully.");
+        log.info('logout', 'Logged out successfully.');
         callback();
       })
       .catch(function(err) {
-        log.error("logout", err);
+        log.error('logout', err);
         return callback(err);
       });
   };

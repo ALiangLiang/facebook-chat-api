@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils");
-var log = require("npmlog");
+var utils = require('../utils');
+var log = require('npmlog');
 
 module.exports = function(defaultFuncs, api, ctx) {
   return function getThreadInfo(threadID, callback) {
@@ -15,19 +15,19 @@ module.exports = function(defaultFuncs, api, ctx) {
       if (err) {
         return callback(err);
       }
-      var key = (Object.keys(userRes).length > 0) ? "user_ids" : "thread_fbids";
+      var key = (Object.keys(userRes).length > 0) ? 'user_ids' : 'thread_fbids';
       form['threads[' + key + '][0]'] = threadID;
 
       if (ctx.globalOptions.pageId) form.request_user_id = ctx.globalOptions.pageId;
 
-      defaultFuncs.post("https://www.facebook.com/ajax/mercury/thread_info.php", ctx.jar, form)
+      defaultFuncs.post('https://www.facebook.com/ajax/mercury/thread_info.php', ctx.jar, form)
         .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
         .then(function(resData) {
           if (resData.error) {
             throw resData;
           } else if (!resData.payload) {
             throw {
-              error: "Could not retrieve thread Info."
+              error: 'Could not retrieve thread Info.'
             };
           }
           var threadData = resData.payload.threads[0];
@@ -35,7 +35,7 @@ module.exports = function(defaultFuncs, api, ctx) {
 
           if (threadData == null) {
             throw {
-              error: "ThreadData is null"
+              error: 'ThreadData is null'
             };
           }
           
@@ -45,7 +45,7 @@ module.exports = function(defaultFuncs, api, ctx) {
           callback(null, utils.formatThread(threadData));
 
         }).catch(function(err) {
-          log.error("getThreadInfo", err);
+          log.error('getThreadInfo', err);
           return callback(err);
         });
     });

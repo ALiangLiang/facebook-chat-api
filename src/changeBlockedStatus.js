@@ -1,13 +1,10 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function changeBlockedStatus(userID, block, callback) {
-    if (!callback) {
-      callback = function () { };
-    }
+function emptyFunc() {}
+
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function changeBlockedStatus(userID, block, callback = emptyFunc) {
     if (block) {
       defaultFuncs
         .post(`https://www.facebook.com/nfx/block_messages/?thread_fbid=${userID}&location=www_chat_head`, ctx.jar, {})
@@ -18,7 +15,7 @@ module.exports = function (defaultFuncs, api, ctx) {
             throw resData;
           }
           defaultFuncs
-            .post(`https://www.facebook.com${/action="(.+?)"+?/.exec(resData.jsmods.markup[0][1].__html)[1].replace(/&amp;/g, '&')}`, ctx.jar, {})
+            .post(`https://www.facebook.com${/action="(.+?)"+?/.exec(resData.jsmods.markup[0][1].__html)[1].replace(/&amp;/g, '&')}`, ctx.jar, {}) // eslint-disable-line no-underscore-dangle
             .then(utils.saveCookies(ctx.jar))
             .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
             .then((_resData) => {

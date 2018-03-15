@@ -1,24 +1,21 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function deleteMessage(messageOrMessages, callback) {
-    if (!callback) {
-      callback = function () {};
-    }
+function emptyFunc() {}
 
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function deleteMessage(messageOrMessages, callback = emptyFunc) {
     const form = {
       client: 'mercury',
     };
 
+    let messages = messageOrMessages;
     if (utils.getType(messageOrMessages) !== 'Array') {
-      messageOrMessages = [messageOrMessages];
+      messages = [messageOrMessages];
     }
 
-    for (let i = 0; i < messageOrMessages.length; i++) {
-      form[`message_ids[${i}]`] = messageOrMessages[i];
+    for (let i = 0; i < messages.length; i += 1) {
+      form[`message_ids[${i}]`] = messages[i];
     }
 
     defaultFuncs

@@ -1,24 +1,19 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function addUserToGroup(userID, threadID, callback) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function addUserToGroup(userID, threadID, callback = function emptyFunc() {}) {
     if (!callback && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
-      throw { error: 'please pass a threadID as a second argument.' };
-    }
-
-    if (!callback) {
-      callback = function () {};
+      throw new Error('please pass a threadID as a second argument.');
     }
 
     if (utils.getType(threadID) !== 'Number' && utils.getType(threadID) !== 'String') {
-      throw { error: `ThreadID should be of type Number or String and not ${utils.getType(threadID)}.` };
+      throw new Error(`ThreadID should be of type Number or String and not ${utils.getType(threadID)}.`);
     }
 
+    let userIDs = userID;
     if (utils.getType(userID) !== 'Array') {
-      userID = [userID];
+      userIDs = [userID];
     }
 
     const messageAndOTID = utils.generateOfflineThreadingID();
@@ -49,19 +44,19 @@ module.exports = function (defaultFuncs, api, ctx) {
       thread_fbid: threadID,
     };
 
-    for (let i = 0; i < userID.length; i++) {
-      if (utils.getType(userID[i]) !== 'Number' && utils.getType(userID[i]) !== 'String') {
-        throw { error: `Elements of userID should be of type Number or String and not ${utils.getType(userID[i])}.` };
+    for (let i = 0; i < userIDs.length; i += 1) {
+      if (utils.getType(userIDs[i]) !== 'Number' && utils.getType(userIDs[i]) !== 'String') {
+        throw new Error(`Elements of userID should be of type Number or String and not ${utils.getType(userIDs[i])}.`);
       }
 
-      form[`log_message_data[added_participants][${i}]`] = `fbid:${userID[i]}`;
+      form[`log_message_data[added_participants][${i}]`] = `fbid:${userIDs[i]}`;
     }
 
     defaultFuncs.post('https://www.facebook.com/messaging/send/', ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then((resData) => {
         if (!resData) {
-          throw { error: 'Add to group failed.' };
+          throw new Error('Add to group failed.');
         }
         if (resData.error) {
           throw resData;

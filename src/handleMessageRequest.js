@@ -1,32 +1,27 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function handleMessageRequest(threadID, accept, callback) {
-    if (utils.getType(accept) !== 'Boolean') {
-      throw {
-        error: 'Please pass a boolean as a second argument.',
-      };
-    }
+function emptyFunc() {}
 
-    if (!callback) {
-      callback = function () {};
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function handleMessageRequest(threadID, accept, callback = emptyFunc) {
+    if (utils.getType(accept) !== 'Boolean') {
+      throw new Error('Please pass a boolean as a second argument.');
     }
 
     const form = {
       client: 'mercury',
     };
 
+    let threadIDs = threadID;
     if (utils.getType(threadID) !== 'Array') {
-      threadID = [threadID];
+      threadIDs = [threadID];
     }
 
     const messageBox = accept ? 'inbox' : 'other';
 
-    for (let i = 0; i < threadID.length; i++) {
-      form[`${messageBox}[${i}]`] = threadID[i];
+    for (let i = 0; i < threadIDs.length; i += 1) {
+      form[`${messageBox}[${i}]`] = threadIDs[i];
     }
 
     defaultFuncs

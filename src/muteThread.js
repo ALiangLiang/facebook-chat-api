@@ -1,15 +1,11 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  // muteSecond: -1=permanent mute, 0=unmute, 60=one minute, 3600=one hour, etc.
-  return function muteThread(threadID, muteSeconds, callback) {
-    if (!callback) {
-      callback = function () {};
-    }
+function emptyFunc() {}
 
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  // muteSecond: -1=permanent mute, 0=unmute, 60=one minute, 3600=one hour, etc.
+  return function muteThread(threadID, muteSeconds, callback = emptyFunc) {
     const form = {
       thread_fbid: threadID,
       mute_settings: muteSeconds,

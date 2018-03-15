@@ -1,12 +1,10 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function resolvePhotoUrl(photoID, callback) {
     if (!callback) {
-      throw { error: 'resolvePhotoUrl: need callback' };
+      throw new Error('resolvePhotoUrl: need callback');
     }
 
     defaultFuncs

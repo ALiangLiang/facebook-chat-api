@@ -1,28 +1,25 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function forwardAttachment(attachmentID, userOrUsers, callback) {
-    if (!callback) {
-      callback = function () {};
-    }
+function emptyFunc() {}
 
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function forwardAttachment(attachmentID, userOrUsers, callback = emptyFunc) {
     const form = {
       attachment_id: attachmentID,
     };
 
+    let users = userOrUsers;
     if (utils.getType(userOrUsers) !== 'Array') {
-      userOrUsers = [userOrUsers];
+      users = [userOrUsers];
     }
 
     const timestamp = Math.floor(Date.now() / 1000);
 
-    for (let i = 0; i < userOrUsers.length; i++) {
+    for (let i = 0; i < users.length; i += 1) {
       // That's good, the key of the array is really timestmap in seconds + index
       // Probably time when the attachment will be sent?
-      form[`recipient_map[${timestamp + i}]`] = userOrUsers[i];
+      form[`recipient_map[${timestamp + i}]`] = users[i];
     }
 
     defaultFuncs

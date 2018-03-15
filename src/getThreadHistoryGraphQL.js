@@ -4,7 +4,7 @@ const utils = require('../utils');
 const log = require('npmlog');
 
 function formatAttachmentsGraphQLResponse(attachment) {
-  switch (attachment.__typename) {
+  switch (attachment.__typename) { // eslint-disable-line no-underscore-dangle
     case 'MessageImage':
       return {
         // Deprecated fields
@@ -59,7 +59,7 @@ function formatAttachmentsGraphQLResponse(attachment) {
     case 'MessageVideo':
       return {
         // Deprecated fields.
-        duration: 0,
+        // duration: 0,
         previewHeight: '',
         previewUrl: '',
         previewWidth: '',
@@ -80,7 +80,6 @@ function formatAttachmentsGraphQLResponse(attachment) {
         //    Ben - July 15th 2017
         videoType: attachment.video_type.toLowerCase(),
       };
-      break;
     case 'MessageFile':
       return {
         // Deprecated fields
@@ -110,7 +109,7 @@ function formatAttachmentsGraphQLResponse(attachment) {
         filename: attachment.filename,
       };
     default:
-      return { error: `Don't know about attachment type ${attachment.__typename}` };
+      return { error: `Don't know about attachment type ${attachment.__typename}` }; // eslint-disable-line no-underscore-dangle
   }
 }
 
@@ -119,17 +118,18 @@ function formatExtensibleAttachment(attachment) {
     return {
       // Deprecated fields
       animatedImageSize: '',
-      duration: '',
+      // duration: '',
       facebookUrl: '',
       height: '',
       width: '',
       image: '',
-      playable: '',
+      // playable: '',
       styleList: '',
       target: '',
 
       type: 'share',
-      description: attachment.story_attachment.description && attachment.story_attachment.description.text,
+      description: attachment.story_attachment.description
+        && attachment.story_attachment.description.text,
       attachmentID: attachment.legacy_attachment_id,
       title: attachment.story_attachment.title_with_entities.text,
       subattachments: attachment.story_attachment.subattachments,
@@ -158,8 +158,9 @@ function formatExtensibleAttachment(attachment) {
       //   }
       //
       properties: attachment.story_attachment.properties.reduce((obj, cur) => {
-        obj[cur.key] = cur.value.text;
-        return obj;
+        const object = obj;
+        object[cur.key] = cur.value.text;
+        return object;
       }, {}),
     };
   }
@@ -174,7 +175,7 @@ function formatReactionsGraphQL(reaction) {
 }
 
 function formatEventData(event) {
-  switch (event.__typename) {
+  switch (event.__typename) { // eslint-disable-line no-underscore-dangle
     case 'ThemeColorExtensibleMessageAdminText':
       return {
         color: event.theme_color,
@@ -189,21 +190,23 @@ function formatEventData(event) {
         threadIcon: event.thread_icon,
       };
     default:
-      return { error: `Don't know what to with event data type ${event.__typename}` };
+      return { error: `Don't know what to with event data type ${event.__typename}` }; // eslint-disable-line no-underscore-dangle
   }
 }
 
 function formatMessagesGraphQLResponse(data) {
   const messageThread = data.o0.data.message_thread;
-  const threadID = messageThread.thread_key.thread_fbid ? messageThread.thread_key.thread_fbid : messageThread.thread_key.other_user_id;
+  const threadID = messageThread.thread_key.thread_fbid
+    ? messageThread.thread_key.thread_fbid
+    : messageThread.thread_key.other_user_id;
 
   // Can be either "GROUP" or ONE_TO_ONE.
   const messages = messageThread.messages.nodes.map((d) => {
-    switch (d.__typename) {
+    switch (d.__typename) { // eslint-disable-line no-underscore-dangle
       case 'UserMessage':
         // Give priority to stickers. They're seen as normal messages but we've
         // been considering them as attachments.
-        var maybeStickerAttachment;
+        let maybeStickerAttachment;
         if (d.sticker) {
           maybeStickerAttachment = [{
             caption: d.snippet, // Not sure what the heck caption was.
@@ -225,9 +228,11 @@ function formatMessagesGraphQLResponse(data) {
 
         return {
           type: 'message',
-          attachments: maybeStickerAttachment || ((d.blob_attachments && d.blob_attachments.length > 0) ? d.blob_attachments.map(formatAttachmentsGraphQLResponse) :
-            (d.extensible_attachment) ? formatExtensibleAttachment(d.extensible_attachment) :
-              []),
+          attachments: maybeStickerAttachment
+            || ((d.blob_attachments && d.blob_attachments.length > 0)
+              ? d.blob_attachments.map(formatAttachmentsGraphQLResponse) :
+              (d.extensible_attachment) ? formatExtensibleAttachment(d.extensible_attachment) :
+                []),
           body: d.message.text,
           // Can be either "GROUP" or ONE_TO_ONE.
           threadType: messageThread.thread_type,
@@ -236,7 +241,9 @@ function formatMessagesGraphQLResponse(data) {
           threadID,
 
           // New
-          messageReactions: d.message_reactions ? d.message_reactions.map(formatReactionsGraphQL) : null,
+          messageReactions: d.message_reactions
+            ? d.message_reactions.map(formatReactionsGraphQL)
+            : null,
           isSponsered: d.is_sponsored,
           snippet: d.snippet,
           timestamp: d.timestamp_precise,
@@ -302,16 +309,16 @@ function formatMessagesGraphQLResponse(data) {
           eventData: formatEventData(d.extensible_message_admin_text),
         };
       default:
-        return { error: `Don't know about message type ${d.__typename}` };
+        return new Error(`Don't know about message type ${d.__typename}`); // eslint-disable-line no-underscore-dangle
     }
   });
   return messages;
 }
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function getThreadHistoryGraphQL(threadID, amount, timestamp, callback) {
     if (!callback) {
-      throw { error: 'getThreadHistoryGraphQL: need callback' };
+      throw new Error('getThreadHistoryGraphQL: need callback');
     }
 
     // `queries` has to be a string. I couldn't tell from the dev console. This

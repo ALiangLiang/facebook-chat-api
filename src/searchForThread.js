@@ -1,11 +1,9 @@
-
-
 const utils = require('../utils');
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function searchForThread(name, callback) {
     if (!callback) {
-      throw { error: 'searchForThread: need callback' };
+      throw new Error('searchForThread: need callback');
     }
 
     const tmpForm = {

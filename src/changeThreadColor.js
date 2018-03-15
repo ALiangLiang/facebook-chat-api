@@ -1,18 +1,15 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function changeThreadColor(color, threadID, callback) {
-    if (!callback) {
-      callback = function () {};
-    }
+function emptyFunc() {}
 
-    const validatedColor = (color !== null) ? color.toLowerCase() : color; // API only accepts lowercase letters in hex string
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function changeThreadColor(color, threadID, callback = emptyFunc) {
+    // API only accepts lowercase letters in hex string
+    const validatedColor = (color !== null) ? color.toLowerCase() : color;
     const colorList = Object.keys(api.threadColors).map(name => api.threadColors[name]);
     if (!colorList.includes(validatedColor)) {
-      throw { error: 'The color you are trying to use is not a valid thread color. Use api.threadColors to find acceptable values.' };
+      throw new Error('The color you are trying to use is not a valid thread color. Use api.threadColors to find acceptable values.');
     }
 
     const form = {
@@ -25,7 +22,7 @@ module.exports = function (defaultFuncs, api, ctx) {
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then((resData) => {
         if (resData.error === 1357031) {
-          throw { error: "Trying to change colors of a chat that doesn't exist. Have at least one message in the thread before trying to change the colors." };
+          throw new Error('Trying to change colors of a chat that doesn\'t exist. Have at least one message in the thread before trying to change the colors.');
         }
         if (resData.error) {
           throw resData;

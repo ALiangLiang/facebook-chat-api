@@ -1,13 +1,11 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
 function formatData(data) {
   const retObj = {};
 
-  for (const prop in data) {
-    if (data.hasOwnProperty(prop)) {
+  Object.keys(data).forEach((prop) => {
+    if (Object.hasOwnProperty.call(data, prop)) {
       const innerObj = data[prop];
       retObj[prop] = {
         name: innerObj.name,
@@ -21,23 +19,24 @@ function formatData(data) {
         isBirthday: !!innerObj.is_birthday,
       };
     }
-  }
+  });
 
   return retObj;
 }
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function getUserInfo(id, callback) {
     if (!callback) {
-      throw { error: 'getUserInfo: need callback' };
+      throw new Error('getUserInfo: need callback');
     }
 
+    let ids = id;
     if (utils.getType(id) !== 'Array') {
-      id = [id];
+      ids = [id];
     }
 
     const form = {};
-    id.map((v, i) => {
+    ids.forEach((v, i) => {
       form[`ids[${i}]`] = v;
     });
     defaultFuncs.post('https://www.facebook.com/chat/user_info/', ctx.jar, form)

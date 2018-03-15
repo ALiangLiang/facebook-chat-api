@@ -1,35 +1,28 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function getThreadList(start, end, type, callback) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function getThreadList(start, ed, tp, cb) {
+    let end = ed;
+    let type = tp;
+    let callback = cb;
     if (utils.getType(callback) === 'Undefined') {
       if (utils.getType(end) !== 'Number') {
-        throw {
-          error: 'Please pass a number as a second argument.',
-        };
+        throw new Error('Please pass a number as a second argument.');
       } else if (utils.getType(type) === 'Function' || utils.getType(type) === 'AsyncFunction') {
         callback = type;
         type = 'inbox'; // default to inbox
       } else if (utils.getType(type) !== 'String') {
-        throw {
-          error: 'Please pass a String as a third argument. Your options are: inbox, pending, and archived',
-        };
+        throw new Error('Please pass a String as a third argument. Your options are: inbox, pending, and archived');
       } else {
-        throw {
-          error: 'getThreadList: need callback',
-        };
+        throw new Error('getThreadList: need callback');
       }
     }
 
     if (type === 'archived') {
       type = 'action:archived';
     } else if (type !== 'inbox' && type !== 'pending' && type !== 'other') {
-      throw {
-        error: 'type can only be one of the following: inbox, pending, archived, other',
-      };
+      throw new Error('type can only be one of the following: inbox, pending, archived, other');
     }
 
     if (end <= start) end = start + 20;

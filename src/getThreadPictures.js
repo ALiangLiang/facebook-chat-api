@@ -1,12 +1,10 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function getThreadPictures(threadID, offset, limit, callback) {
     if (!callback) {
-      throw { error: 'getThreadPictures: need callback' };
+      throw new Error('getThreadPictures: need callback');
     }
 
     let form = {
@@ -30,13 +28,15 @@ module.exports = function (defaultFuncs, api, ctx) {
           return defaultFuncs
             .post('https://www.facebook.com/ajax/messaging/attachments/sharedphotos.php', ctx.jar, form)
             .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
-            .then((resData) => {
-              if (resData.error) {
-                throw resData;
+            .then((resData2) => {
+              if (resData2.error) {
+                throw resData2;
               }
               // the response is pretty messy
-              const queryThreadID = resData.jsmods.require[0][3][1].query_metadata.query_path[0].message_thread;
-              const imageData = resData.jsmods.require[0][3][1].query_results[queryThreadID].message_images.edges[0].node.image2;
+              const queryThreadID = resData2.jsmods.require[0][3][1]
+                .query_metadata.query_path[0].message_thread;
+              const imageData = resData2.jsmods.require[0][3][1]
+                .query_results[queryThreadID].message_images.edges[0].node.image2;
               return imageData;
             });
         }));

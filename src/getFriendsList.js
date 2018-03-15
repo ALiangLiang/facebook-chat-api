@@ -1,6 +1,3 @@
-
-
-const cheerio = require('cheerio');
 const utils = require('../utils');
 const log = require('npmlog');
 
@@ -39,10 +36,10 @@ function formatData(obj) {
   });
 }
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function getFriendsList(callback) {
     if (!callback) {
-      throw { error: 'getFriendsList: need callback' };
+      throw new Error('getFriendsList: need callback');
     }
 
     defaultFuncs
@@ -50,7 +47,7 @@ module.exports = function (defaultFuncs, api, ctx) {
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then((resData) => {
         if (!resData) {
-          throw { error: 'getFriendsList returned empty object.' };
+          throw new Error('getFriendsList returned empty object.');
         }
         if (resData.error) {
           throw resData;

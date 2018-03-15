@@ -1,5 +1,3 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 const bluebird = require('bluebird');
@@ -14,14 +12,14 @@ const allowedProperties = {
   mentions: true,
 };
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   function uploadAttachment(attachments, callback) {
     const uploads = [];
 
     // create an array of promises
-    for (let i = 0; i < attachments.length; i++) {
+    for (let i = 0; i < attachments.length; i += 1) {
       if (!utils.isReadableStream(attachments[i])) {
-        throw { error: `Attachment should be a readable stream and not ${utils.getType(attachments[i])}.` };
+        throw new Error(`Attachment should be a readable stream and not ${utils.getType(attachments[i])}.`);
       }
 
       const form = {
@@ -74,7 +72,7 @@ module.exports = function (defaultFuncs, api, ctx) {
           return callback({ error: 'Invalid url' });
         }
 
-        callback(null, resData.payload.share_data.share_params);
+        return callback(null, resData.payload.share_data.share_params);
       })
       .catch((err) => {
         log.error('getUrl', err);
@@ -82,29 +80,28 @@ module.exports = function (defaultFuncs, api, ctx) {
       });
   }
 
-  function sendContent(form, threadID, isSingleUser, messageAndOTID, callback) {
+  function sendContent(fm, threadID, isSingleUser, messageAndOTID, callback) {
+    const form = fm;
     // There are three cases here:
     // 1. threadID is of type array, where we're starting a new group chat with users
     //    specified in the array.
     // 2. User is sending a message to a specific user.
     // 3. No additional form params and the message goes to an existing group chat.
     if (utils.getType(threadID) === 'Array') {
-      for (let i = 0; i < threadID.length; i++) {
+      for (let i = 0; i < threadID.length; i += 1) {
         form[`specific_to_list[${i}]`] = `fbid:${threadID[i]}`;
       }
       form[`specific_to_list[${threadID.length}]`] = `fbid:${ctx.userID}`;
       form.client_thread_id = `root:${messageAndOTID}`;
       log.info('sendMessage', `Sending message to multiple users: ${threadID}`);
-    } else {
+    } else if (isSingleUser) {
       // This means that threadID is the id of a user, and the chat
       // is a single person chat
-      if (isSingleUser) {
-        form['specific_to_list[0]'] = `fbid:${threadID}`;
-        form['specific_to_list[1]'] = `fbid:${ctx.userID}`;
-        form.other_user_fbid = threadID;
-      } else {
-        form.thread_fbid = threadID;
-      }
+      form['specific_to_list[0]'] = `fbid:${threadID}`;
+      form['specific_to_list[1]'] = `fbid:${ctx.userID}`;
+      form.other_user_fbid = threadID;
+    } else {
+      form.thread_fbid = threadID;
     }
 
     if (ctx.globalOptions.pageID) {
@@ -159,12 +156,13 @@ module.exports = function (defaultFuncs, api, ctx) {
         if (err) {
           return callback(err);
         }
-        sendContent(form, threadID, Object.keys(res).length > 0, messageAndOTID, callback);
+        return sendContent(form, threadID, Object.keys(res).length > 0, messageAndOTID, callback);
       });
     }
   }
 
-  function handleUrl(msg, form, callback, cb) {
+  function handleUrl(msg, fm, callback, cb) {
+    const form = fm;
     if (msg.url) {
       form['shareable_attachment[share_type]'] = '100';
       getUrl(msg.url, (err, params) => {
@@ -173,21 +171,24 @@ module.exports = function (defaultFuncs, api, ctx) {
         }
 
         form['shareable_attachment[share_params]'] = params;
-        cb();
+        return cb();
       });
     } else {
       cb();
     }
   }
 
-  function handleSticker(msg, form, callback, cb) {
+  function handleSticker(msg, fm, callback, cb) {
+    const form = fm;
     if (msg.sticker) {
       form.sticker_id = msg.sticker;
     }
     cb();
   }
 
-  function handleEmoji(msg, form, callback, cb) {
+  function handleEmoji(mg, fm, callback, cb) {
+    const msg = mg;
+    const form = fm;
     if (msg.emojiSize != null && msg.emoji == null) {
       return callback({ error: 'emoji property is empty' });
     }
@@ -195,19 +196,21 @@ module.exports = function (defaultFuncs, api, ctx) {
       if (msg.emojiSize == null) {
         msg.emojiSize = 'medium';
       }
-      if (msg.emojiSize != 'small' && msg.emojiSize != 'medium' && msg.emojiSize != 'large') {
+      if (msg.emojiSize !== 'small' && msg.emojiSize !== 'medium' && msg.emojiSize !== 'large') {
         return callback({ error: 'emojiSize property is invalid' });
       }
-      if (form.body != null && form.body != '') {
+      if (form.body !== null && form.body !== '') {
         return callback({ error: 'body is not empty' });
       }
       form.body = msg.emoji;
       form['tags[0]'] = `hot_emoji_size:${msg.emojiSize}`;
     }
-    cb();
+    return cb();
   }
 
-  function handleAttachment(msg, form, callback, cb) {
+  function handleAttachment(mg, fm, callback, cb) {
+    const msg = mg;
+    const form = fm;
     if (msg.attachment) {
       form.image_ids = [];
       form.gif_ids = [];
@@ -229,19 +232,20 @@ module.exports = function (defaultFuncs, api, ctx) {
           const type = key[0]; // image_id, file_id, etc
           form[`${type}s`].push(file[type]); // push the id
         });
-        cb();
+        return cb();
       });
     } else {
       cb();
     }
   }
 
-  function handleMention(msg, form, callback, cb) {
+  function handleMention(msg, fm, callback, cb) {
+    const form = fm;
     if (msg.mentions) {
-      for (let i = 0; i < msg.mentions.length; i++) {
+      for (let i = 0; i < msg.mentions.length; i += 1) {
         const mention = msg.mentions[i];
 
-        const tag = mention.tag;
+        const { tag } = mention;
         if (typeof tag !== 'string') {
           return callback({ error: 'Mention tags must be strings.' });
         }
@@ -264,16 +268,15 @@ module.exports = function (defaultFuncs, api, ctx) {
         form[`profile_xmd[${i}][type]`] = 'p';
       }
     }
-    cb();
+    return cb();
   }
 
-  return function sendMessage(msg, threadID, callback) {
-    if (!callback && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
-      return callback({ error: 'Pass a threadID as a second argument.' });
+  return function sendMessage(mg, threadID, cb) {
+    let msg = mg;
+    if (!cb && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
+      return new Error('Pass a threadID as a second argument.');
     }
-    if (!callback) {
-      callback = function () {};
-    }
+    const callback = cb || function emptyFunc() {};
 
     const msgType = utils.getType(msg);
     const threadIDType = utils.getType(threadID);
@@ -330,7 +333,7 @@ module.exports = function (defaultFuncs, api, ctx) {
       signatureID: utils.getSignatureID(),
     };
 
-    handleSticker(
+    return handleSticker(
       msg, form, callback,
       () => handleAttachment(
         msg, form, callback,

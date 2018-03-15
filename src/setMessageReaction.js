@@ -1,14 +1,9 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function setMessageReaction(reaction, messageID, callback) {
-    if (!callback) {
-      callback = function () {};
-    }
-
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function setMessageReaction(rc, messageID, callback = () => {}) {
+    let reaction = rc;
     switch (reaction) {
       case '\uD83D\uDE0D': // :heart_eyes:
       case '\uD83D\uDE06': // :laughing:
@@ -49,14 +44,13 @@ module.exports = function (defaultFuncs, api, ctx) {
         break;
       default:
         return callback({ error: 'Reaction is not a valid emoji.' });
-        break;
     }
 
     const variables = {
       data: {
-        client_mutation_id: ctx.clientMutationId++,
+        client_mutation_id: ctx.clientMutationId += 1,
         actor_id: ctx.userID,
-        action: reaction == '' ? 'REMOVE_REACTION' : 'ADD_REACTION',
+        action: reaction === '' ? 'REMOVE_REACTION' : 'ADD_REACTION',
         message_id: messageID,
         reaction,
       },
@@ -68,12 +62,12 @@ module.exports = function (defaultFuncs, api, ctx) {
       dpr: 1,
     };
 
-    defaultFuncs
+    return defaultFuncs
       .postFormData('https://www.messenger.com/webgraphql/mutation/', ctx.jar, {}, qs)
       .then(utils.parseAndCheckLogin(ctx.jar, defaultFuncs))
       .then((resData) => {
         if (!resData) {
-          throw { error: 'setReaction returned empty object.' };
+          throw new Error('setReaction returned empty object.');
         }
         if (resData.error) {
           throw resData;

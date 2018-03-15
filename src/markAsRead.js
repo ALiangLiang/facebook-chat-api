@@ -1,14 +1,10 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function markAsRead(threadID, callback) {
-    if (!callback) {
-      callback = function () {};
-    }
+function emptyFunc() {}
 
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function markAsRead(threadID, callback = emptyFunc) {
     const form = {};
     form[`ids[${threadID}]`] = true;
     form.watermarkTimestamp = new Date().getTime();

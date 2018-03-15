@@ -1,12 +1,10 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function changeNickname(nickname, threadID, participantID, callback) {
-    callback = callback || function () {};
+function emptyFunc() {}
 
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function changeNickname(nickname, threadID, participantID, callback = emptyFunc) {
     const form = {
       nickname,
       participant_id: participantID,
@@ -18,10 +16,10 @@ module.exports = function (defaultFuncs, api, ctx) {
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then((resData) => {
         if (resData.error === 1545014) {
-          throw { error: "Trying to change nickname of user isn't in thread" };
+          throw new Error('Trying to change nickname of user isn\'t in thread');
         }
         if (resData.error === 1357031) {
-          throw { error: "Trying to change user nickname of a thread that doesn't exist. Have at least one message in the thread before trying to change the user nickname." };
+          throw new Error('Trying to change user nickname of a thread that doesn\'t exist. Have at least one message in the thread before trying to change the user nickname.');
         }
         if (resData.error) {
           throw resData;

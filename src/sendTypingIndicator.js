@@ -1,9 +1,7 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   function makeTypingIndicator(typ, threadID, callback) {
     const form = {
       typ: +typ,
@@ -24,7 +22,7 @@ module.exports = function (defaultFuncs, api, ctx) {
         form.to = threadID;
       }
 
-      defaultFuncs
+      return defaultFuncs
         .post('https://www.facebook.com/ajax/messaging/typ.php', ctx.jar, form)
         .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
         .then((resData) => {
@@ -34,16 +32,17 @@ module.exports = function (defaultFuncs, api, ctx) {
 
           return callback();
         })
-        .catch((err) => {
-          log.error('sendTypingIndicator', err);
-          return callback(err);
+        .catch((err2) => {
+          log.error('sendTypingIndicator', err2);
+          return callback(err2);
         });
     });
   }
 
-  return function sendTypingIndicator(threadID, callback) {
-    if (utils.getType(callback) !== 'Function' && utils.getType(callback) !== 'AsyncFunction') {
-      if (callback) {
+  return function sendTypingIndicator(threadID, cb) {
+    let callback = cb;
+    if (utils.getType(cb) !== 'Function' && utils.getType(cb) !== 'AsyncFunction') {
+      if (cb) {
         log.warn('sendTypingIndicator', 'callback is not a function - ignoring.');
       }
       callback = () => {};
@@ -51,15 +50,16 @@ module.exports = function (defaultFuncs, api, ctx) {
 
     makeTypingIndicator(true, threadID, callback);
 
-    return function end(cb) {
-      if (utils.getType(cb) !== 'Function' && utils.getType(cb) !== 'AsyncFunction') {
-        if (cb) {
+    return function end(cb2) {
+      let callback2 = cb2;
+      if (utils.getType(cb2) !== 'Function' && utils.getType(cb2) !== 'AsyncFunction') {
+        if (cb2) {
           log.warn('sendTypingIndicator', 'callback is not a function - ignoring.');
         }
-        cb = () => {};
+        callback2 = () => {};
       }
 
-      makeTypingIndicator(false, threadID, cb);
+      makeTypingIndicator(false, threadID, callback2);
     };
   };
 };

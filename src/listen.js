@@ -4,19 +4,19 @@ const utils = require('../utils');
 const log = require('npmlog');
 
 let msgsRecv = 0;
-const identity = function () {};
+function identity() {}
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   let currentlyRunning = null;
   let globalCallback = identity;
 
-  const stopListening = function () {
+  function stopListening() {
     globalCallback = identity;
     if (currentlyRunning) {
       clearTimeout(currentlyRunning);
       currentlyRunning = null;
     }
-  };
+  }
 
   let prev = Date.now();
   let tmpPrev = Date.now();
@@ -41,10 +41,10 @@ module.exports = function (defaultFuncs, api, ctx) {
    * Returns false otherwise.
    */
   function handleMessagingEvents(event) {
+    let fmtMsg;
     switch (event.event) {
       // "read_receipt" event triggers when other people read the user's messages.
       case 'read_receipt':
-        var fmtMsg;
         try {
           fmtMsg = utils.formatReadReceipt(event);
         } catch (err) {
@@ -60,7 +60,6 @@ module.exports = function (defaultFuncs, api, ctx) {
         return true;
       // "read event" triggers when the user read other people's messages.
       case 'read':
-        var fmtMsg;
         try {
           fmtMsg = utils.formatRead(event);
         } catch (err) {
@@ -86,8 +85,8 @@ module.exports = function (defaultFuncs, api, ctx) {
       return;
     }
 
-    form.idle = ~~(Date.now() / 1000) - prev;
-    prev = ~~(Date.now() / 1000);
+    form.idle = Math.floor(Date.now() / 1000) - prev;
+    prev = Math.floor(Date.now() / 1000);
     const presence = utils.generatePresence(ctx.userID);
     ctx.jar.setCookie(`presence=${presence}; path=/; domain=.facebook.com; secure`, 'https://www.facebook.com');
     utils.get(`https://${serverNumber}-edge-chat.facebook.com/pull`, ctx.jar, form)
@@ -106,18 +105,18 @@ module.exports = function (defaultFuncs, api, ctx) {
           delete form.sticky_pool;
           delete form.sticky_token;
           const form4 = {
-            lastSync: ~~(lastSync / 1000),
+            lastSync: Math.floor(lastSync / 1000),
           };
           defaultFuncs.get('https://www.facebook.com/notifications/sync/', ctx.jar, form4)
             .then(utils.saveCookies(ctx.jar))
             .then(() => {
               lastSync = Date.now();
-              const form = {
+              const form5 = {
                 client: 'mercury',
                 'folders[0]': 'inbox',
-                last_action_timestamp: ~~(Date.now() - 60),
+                last_action_timestamp: Math.floor(Date.now() - 60),
               };
-              defaultFuncs.post('https://www.facebook.com/ajax/mercury/thread_sync.php', ctx.jar, form)
+              defaultFuncs.post('https://www.facebook.com/ajax/mercury/thread_sync.php', ctx.jar, form5)
                 .then(() => {
                   currentlyRunning = setTimeout(listen, 1000);
                 });
@@ -138,7 +137,7 @@ module.exports = function (defaultFuncs, api, ctx) {
                 (!ctx.globalOptions.selfListen && v.from.toString() === ctx.userID)) {
                   return;
                 }
-                var fmtMsg;
+                let fmtMsg;
                 try {
                   fmtMsg = utils.formatTyp(v);
                 } catch (err) {
@@ -157,8 +156,8 @@ module.exports = function (defaultFuncs, api, ctx) {
                 }
 
                 if (ctx.loggedIn) {
-                  for (const userID in v.buddyList) {
-                    var formattedPresence;
+                  Object.keys(v.buddyList).forEach((userID) => {
+                    let formattedPresence;
                     try {
                       formattedPresence = utils.formatProxyPresence(v.buddyList[userID], userID);
                     } catch (err) {
@@ -173,7 +172,8 @@ module.exports = function (defaultFuncs, api, ctx) {
                     if (formattedPresence != null) {
                       globalCallback(null, formattedPresence);
                     }
-                  }
+                    return undefined;
+                  });
                 }
 
                 break;
@@ -203,9 +203,9 @@ module.exports = function (defaultFuncs, api, ctx) {
               case 'delta':
                 if (ctx.globalOptions.pageID || (v.delta.class !== 'NewMessage' && !ctx.globalOptions.listenEvents)) return;
 
-                if (v.delta.class == 'NewMessage') {
+                if (v.delta.class === 'NewMessage') {
                   (function resolveAttachmentUrl(i) {
-                    if (i == v.delta.attachments.length) {
+                    if (i === v.delta.attachments.length) {
                       let fmtMsg;
                       try {
                         fmtMsg = utils.formatDeltaMessage(v);
@@ -217,9 +217,10 @@ module.exports = function (defaultFuncs, api, ctx) {
                           type: 'parse_error',
                         });
                       }
-                      return (!ctx.globalOptions.selfListen && fmtMsg.senderID === ctx.userID) ? undefined : globalCallback(null, fmtMsg);
+                      return (!ctx.globalOptions.selfListen && fmtMsg.senderID === ctx.userID)
+                        ? undefined : globalCallback(null, fmtMsg);
                     }
-                    if (v.delta.attachments[i].mercury.attach_type == 'photo') {
+                    if (v.delta.attachments[i].mercury.attach_type === 'photo') {
                       api.resolvePhotoUrl(v.delta.attachments[i].fbid, (err, url) => {
                         if (!err) v.delta.attachments[i].mercury.metadata.url = url;
                         return resolveAttachmentUrl(i + 1);
@@ -231,15 +232,17 @@ module.exports = function (defaultFuncs, api, ctx) {
                   break;
                 }
 
-                if (v.delta.class == 'ClientPayload') {
+                if (v.delta.class === 'ClientPayload') {
                   const clientPayload = utils.decodeClientPayload(v.delta.payload);
                   if (clientPayload && clientPayload.deltas) {
-                    for (const i in clientPayload.deltas) {
+                    Object.keys(clientPayload.deltas).forEach((i) => {
                       const delta = clientPayload.deltas[i];
                       if (delta.deltaMessageReaction) {
                         globalCallback(null, {
                           type: 'message_reaction',
-                          threadID: delta.deltaMessageReaction.threadKey.threadFbId ? delta.deltaMessageReaction.threadKey.threadFbId : delta.deltaMessageReaction.threadKey.otherUserFbId,
+                          threadID: delta.deltaMessageReaction.threadKey.threadFbId
+                            ? delta.deltaMessageReaction.threadKey.threadFbId
+                            : delta.deltaMessageReaction.threadKey.otherUserFbId,
                           messageID: delta.deltaMessageReaction.messageId,
                           reaction: delta.deltaMessageReaction.reaction,
                           senderID: delta.deltaMessageReaction.senderId,
@@ -247,14 +250,13 @@ module.exports = function (defaultFuncs, api, ctx) {
                           timestamp: v.ofd_ts,
                         });
                       }
-                    }
+                    });
                     return;
                   }
                 }
 
                 switch (v.delta.class) {
                   case 'ReadReceipt':
-                    var fmtMsg;
                     try {
                       fmtMsg = utils.formatDeltaReadReceipt(v.delta);
                     } catch (err) {
@@ -273,12 +275,12 @@ module.exports = function (defaultFuncs, api, ctx) {
                       case 'change_thread_icon':
                         break;
                       default:
-                        return;
                     }
+                    break;
                   case 'ThreadName':
                   case 'ParticipantsAddedToGroupThread':
                   case 'ParticipantLeftGroupThread':
-                    var formattedEvent;
+                    let formattedEvent;
                     try {
                       formattedEvent = utils.formatDeltaEvent(v.delta);
                     } catch (err) {
@@ -289,29 +291,31 @@ module.exports = function (defaultFuncs, api, ctx) {
                         type: 'parse_error',
                       });
                     }
-                    return (!ctx.globalOptions.selfListen && formattedEvent.author.toString() === ctx.userID || !ctx.loggedIn)
+                    return ((!ctx.globalOptions.selfListen
+                      && (formattedEvent.author.toString() === ctx.userID)) || !ctx.loggedIn)
                       ? undefined
                       : globalCallback(null, formattedEvent);
+                  default: break;
                 }
 
                 break;
               case 'messaging':
                 if (handleMessagingEvents(v)) {
-
+                  return undefined;
                 }
                 break;
               case 'pages_messaging':
                 if (!ctx.globalOptions.pageID ||
                 v.event !== 'deliver' ||
-                (!ctx.globalOptions.selfListen && (v.message.sender_fbid.toString() === ctx.userID ||
-                                                   v.message.sender_fbid.toString() === ctx.globalOptions.pageID)) ||
+                (!ctx.globalOptions.selfListen
+                  && (v.message.sender_fbid.toString() === ctx.userID
+                    || v.message.sender_fbid.toString() === ctx.globalOptions.pageID)) ||
                 v.realtime_viewer_fbid.toString() !== ctx.globalOptions.pageID) {
                   return;
                 }
 
                 atLeastOne = true;
                 if (ctx.loggedIn) {
-                  var fmtMsg;
                   try {
                     fmtMsg = utils.formatMessage(v);
                   } catch (err) {
@@ -325,6 +329,7 @@ module.exports = function (defaultFuncs, api, ctx) {
                   return globalCallback(null, fmtMsg);
                 }
                 break;
+              default: break;
             }
           });
 
@@ -332,9 +337,12 @@ module.exports = function (defaultFuncs, api, ctx) {
           // Send deliveryReceipt notification to the server
             const formDeliveryReceipt = {};
 
-            resData.ms.filter(v => v.message && v.message.mid && v.message.sender_fbid.toString() !== ctx.userID).forEach((val, i) => {
-              formDeliveryReceipt[`[${i}]`] = val.message.mid;
-            });
+            resData.ms
+              .filter(v => v.message && v.message.mid
+                && (v.message.sender_fbid.toString() !== ctx.userID))
+              .forEach((val, i) => {
+                formDeliveryReceipt[`[${i}]`] = val.message.mid;
+              });
 
             // If there's at least one, we do the post request
             if (formDeliveryReceipt['[0]']) {
@@ -350,29 +358,29 @@ module.exports = function (defaultFuncs, api, ctx) {
           form.traceid = resData.tr;
         }
         if (currentlyRunning) {
-          currentlyRunning = setTimeout(listen, Math.random() * 200 + 50);
+          currentlyRunning = setTimeout(listen, (Math.random() * 200) + 50);
         }
       })
       .catch((err) => {
         if (err.code === 'ETIMEDOUT') {
           log.info('listen', 'Suppressed timeout error.');
         } else if (err.code === 'EAI_AGAIN') {
-          serverNumber = (~~(Math.random() * 6)).toString();
+          serverNumber = (Math.floor(Math.random() * 6)).toString();
         } else {
           log.error('listen', err);
           globalCallback(err);
         }
         if (currentlyRunning) {
-          currentlyRunning = setTimeout(listen, Math.random() * 200 + 50);
+          currentlyRunning = setTimeout(listen, (Math.random() * 200) + 50);
         }
       });
   }
 
-  return function (callback) {
+  return function anonymousFunc(callback) {
     globalCallback = callback;
 
     if (!currentlyRunning) {
-      currentlyRunning = setTimeout(listen, Math.random() * 200 + 50, callback);
+      currentlyRunning = setTimeout(listen, (Math.random() * 200) + 50, callback);
     }
 
     return stopListening;

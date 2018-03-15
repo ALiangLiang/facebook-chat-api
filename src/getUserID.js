@@ -1,5 +1,3 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
@@ -17,10 +15,10 @@ function formatData(data) {
   };
 }
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function getUserID(name, callback) {
     if (!callback) {
-      throw { error: 'getUserID: need callback' };
+      throw new Error('getUserID: need callback');
     }
 
     const form = {

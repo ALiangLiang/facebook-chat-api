@@ -1,16 +1,15 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function setTitle(newTitle, threadID, callback) {
-    if (!callback && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
-      throw { error: 'please pass a threadID as a second argument.' };
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function setTitle(newTitle, threadID, cb) {
+    if (!cb && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
+      throw new Error('please pass a threadID as a second argument.');
     }
 
-    if (!callback) {
-      callback = function () {};
+    let callback = cb;
+    if (!cb) {
+      callback = () => {};
     }
 
     const messageAndOTID = utils.generateOfflineThreadingID();
@@ -47,11 +46,11 @@ module.exports = function (defaultFuncs, api, ctx) {
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then((resData) => {
         if (resData.error && resData.error === 1545012) {
-          throw { error: 'Cannot change chat title: Not member of chat.' };
+          throw new Error('Cannot change chat title: Not member of chat.');
         }
 
         if (resData.error && resData.error === 1545003) {
-          throw { error: 'Cannot set title of single-user chat.' };
+          throw new Error('Cannot set title of single-user chat.');
         }
 
         if (resData.error) {

@@ -1,24 +1,21 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 
-module.exports = function (defaultFuncs, api, ctx) {
-  return function deleteThread(threadOrThreads, callback) {
-    if (!callback) {
-      callback = function () {};
-    }
+function emptyFunc() {}
 
+module.exports = function wrapper(defaultFuncs, api, ctx) {
+  return function deleteThread(threadOrThreads, callback = emptyFunc) {
     const form = {
       client: 'mercury',
     };
 
+    let threads = threadOrThreads;
     if (utils.getType(threadOrThreads) !== 'Array') {
-      threadOrThreads = [threadOrThreads];
+      threads = [threadOrThreads];
     }
 
-    for (let i = 0; i < threadOrThreads.length; i++) {
-      form[`ids[${i}]`] = threadOrThreads[i];
+    for (let i = 0; i < threads.length; i += 1) {
+      form[`ids[${i}]`] = threads[i];
     }
 
     defaultFuncs

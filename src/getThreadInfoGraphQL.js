@@ -30,7 +30,9 @@ function formatEventReminders(reminder) {
 
 function formatThreadGraphQLResponse(data) {
   const messageThread = data.o0.data.message_thread;
-  const threadID = messageThread.thread_key.thread_fbid ? messageThread.thread_key.thread_fbid : messageThread.thread_key.other_user_id;
+  const threadID = messageThread.thread_key.thread_fbid ?
+    messageThread.thread_key.thread_fbid :
+    messageThread.thread_key.other_user_id;
 
   return {
     threadID,
@@ -40,16 +42,20 @@ function formatThreadGraphQLResponse(data) {
     messageCount: messageThread.messages_count,
     timestamp: messageThread.updated_time_precise,
     isPinProtected: messageThread.is_pin_protected,
-    eventReminders: messageThread.event_reminders ? messageThread.event_reminders.nodes.map(formatEventReminders) : null,
+    eventReminders: messageThread.event_reminders ?
+      messageThread.event_reminders.nodes.map(formatEventReminders) :
+      null,
     relatedPageThread: messageThread.related_page_thread,
     reactionsMuteMode: messageThread.reactions_mute_mode.toLowerCase(),
     mentionsMuteMode: messageThread.mentions_mute_mode.toLowerCase(),
     threadType: messageThread.thread_type.toLowerCase(),
     topEmojis: messageThread.top_emojis,
     emoji: messageThread.customization_info ? messageThread.customization_info.emoji : null,
-    color: messageThread.customization_info && messageThread.customization_info.outgoing_bubble_color ?
+    color: messageThread.customization_info &&
+      messageThread.customization_info.outgoing_bubble_color ?
       messageThread.customization_info.outgoing_bubble_color.slice(2) : null,
-    nicknames: messageThread.customization_info && messageThread.customization_info.participant_customizations ?
+    nicknames: messageThread.customization_info &&
+      messageThread.customization_info.participant_customizations ?
       messageThread.customization_info.participant_customizations.reduce((res, val) => {
         if (val.nickname) res[val.participant_id] = val.nickname;
         return res;
@@ -57,10 +63,10 @@ function formatThreadGraphQLResponse(data) {
   };
 }
 
-module.exports = function (defaultFuncs, api, ctx) {
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   return function getThreadInfoGraphQL(threadID, callback) {
     if (!callback) {
-      throw { error: 'getThreadInfoGraphQL: need callback' };
+      throw new Error('getThreadInfoGraphQL: need callback');
     }
 
     // `queries` has to be a string. I couldn't tell from the dev console. This

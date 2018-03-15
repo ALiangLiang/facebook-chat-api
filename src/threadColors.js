@@ -1,7 +1,6 @@
-
-
-module.exports = function (defaultFuncs, api, ctx) {
-  // Currently the only colors that can be passed to api.changeThreadColor(); may change if Facebook adds more
+module.exports = function wrapper() {
+  // Currently the only colors that can be passed to api.changeThreadColor();
+  // may change if Facebook adds more
   return {
     MessengerBlue: null,
     Viking: '#44bec7',

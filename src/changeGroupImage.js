@@ -1,10 +1,10 @@
-
-
 const utils = require('../utils');
 const log = require('npmlog');
 const bluebird = require('bluebird');
 
-module.exports = function (defaultFuncs, api, ctx) {
+function emptyFunc() {}
+
+module.exports = function wrapper(defaultFuncs, api, ctx) {
   function handleUpload(image, callback) {
     const uploads = [];
 
@@ -36,13 +36,9 @@ module.exports = function (defaultFuncs, api, ctx) {
       });
   }
 
-  return function changeGroupImage(image, threadID, callback) {
+  return function changeGroupImage(image, threadID, callback = emptyFunc) {
     if (!callback && (utils.getType(threadID) === 'Function' || utils.getType(threadID) === 'AsyncFunction')) {
-      throw { error: 'please pass a threadID as a second argument.' };
-    }
-
-    if (!callback) {
-      callback = function () {};
+      throw new Error('please pass a threadID as a second argument.');
     }
 
     const messageAndOTID = utils.generateOfflineThreadingID();
@@ -86,7 +82,7 @@ module.exports = function (defaultFuncs, api, ctx) {
       form['log_message_data[image][image_id]'] = payload[0].image_id;
       form['log_message_data[image][src]'] = payload[0].src;
 
-      defaultFuncs
+      return defaultFuncs
         .post('https://www.facebook.com/messaging/send/', ctx.jar, form)
         .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
         .then((resData) => {
@@ -98,9 +94,9 @@ module.exports = function (defaultFuncs, api, ctx) {
 
           return callback();
         })
-        .catch((err) => {
-          log.error('changeGroupImage', err);
-          return callback(err);
+        .catch((err2) => {
+          log.error('changeGroupImage', err2);
+          return callback(err2);
         });
     });
   };
